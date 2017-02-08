@@ -18,9 +18,11 @@
   },
   "devDependencies": {
     "@tradle/models": "https://github.com/tradle/models",
+    "eslint": "^3.15.0",
     "tape": "^4.6.3"
   },
   "scripts": {
-    "test": "node test"
+    "test": "node test",
+    "lint": "eslint --quiet ."
   }
 }

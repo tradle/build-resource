@@ -26,7 +26,7 @@ test('build resource', function (t) {
   t.same(builder.toJSON(), {
     _t: model.id,
     firstName: 'ted',
-    photos: photos
+    photos
   })
 
   t.throws(() => builder.firstName(2), /string/)

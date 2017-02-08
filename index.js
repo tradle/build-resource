@@ -6,8 +6,6 @@ const validateResource = require('@tradle/validate-resource')
 const validateResourceProperty = validateResource.property
 const {
   TYPE,
-  PERMALINK,
-  LINK,
   SIG
 } = constants
 
@@ -36,11 +34,15 @@ module.exports = function builder ({ models, model }) {
   function makeSetter (propertyName) {
     const prop = model.properties[propertyName]
     return function setValue (value) {
+      if (typeof value === 'undefined' || value == null) {
+        throw new Error(`invalid value ${value} for property ${propertyName}`)
+      }
+
       if (prop.type === 'array' && !prop.inlined) {
         value = buildArrayValue({ models, model, propertyName, value })
       }
 
-      if (prop.type === 'object' && !prop.inlined && prop.ref && !val.id) {
+      if (prop.type === 'object' && !prop.inlined && prop.ref && !value.id) {
         value = buildResourceStub({ models, model, propertyName, resource: value })
       }
 
@@ -59,7 +61,9 @@ module.exports = function builder ({ models, model }) {
 }
 
 function buildId ({ model, resource }) {
-  if (!resource[SIG]) throw new Error('expected signed object')
+  if (!resource[SIG]) {
+    throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
+  }
 
   const { link, permalink } = utils.getLinks({ object: resource })
   let id = `${model.id}_${permalink}`
@@ -77,7 +81,7 @@ function buildId ({ model, resource }) {
 function buildDisplayName ({ model, resource }) {
   const { properties } = model
   const displayNameProps = Object.keys(properties).filter(p => {
-    if (resource[p] == null) return
+    if (typeof resource[p] === 'undefined') return
 
     const prop = properties[p]
     if (prop.displayName) {
@@ -144,16 +148,11 @@ function buildArrayValue (opts) {
 }
 
 function buildResourceStub (opts) {
-  const { models, model, resource, propertyName } = opts
-  const prop = model.properties[propertyName]
+  const { models, resource } = opts
   return {
     id: buildId({ model: models[resource[TYPE]], resource }),
     title: buildDisplayName(opts)
   }
-}
-
-function assert (statement, err) {
-  if (!statement) throw new Error(err || 'assertion failed')
 }
 
 function getRef (prop) {
