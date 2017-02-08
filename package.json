@@ -1,0 +1,26 @@
+{
+  "name": "@tradle/build-resource",
+  "version": "1.0.0",
+  "description": "resource builder",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tradle/build-resource"
+  },
+  "author": "mvayngrib",
+  "license": "MIT",
+  "dependencies": {
+    "@tradle/engine": "^3.10.4",
+    "@tradle/validate": "https://github.com/tradle/validate",
+    "@tradle/validate-resource": "https://github.com/tradle/validate-resource",
+    "clone": "^2.1.0",
+    "xtend": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tradle/models": "https://github.com/tradle/models",
+    "tape": "^4.6.3"
+  },
+  "scripts": {
+    "test": "node test"
+  }
+}
