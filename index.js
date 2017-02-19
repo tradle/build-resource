@@ -1,6 +1,6 @@
 const clone = require('clone')
 const { utils, constants } = require('@tradle/engine')
-const validateModels = require('@tradle/validate').models
+const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
 const validateResourceProperty = validateResource.property
@@ -17,7 +17,7 @@ module.exports = function builder ({ models, model }) {
   validateModel(model)
 
   const resource = {
-    [SIG]: 'sigplaceholder',
+    [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
   }
 
@@ -94,50 +94,6 @@ function buildDisplayName ({ model, resource }) {
     .join(' ')
 }
 
-// function getDisplayName ({ models, model, resource }) {
-//   const meta = model.properties
-//   if (!meta) {
-//     if (resource.title) {
-//       return resource.title
-//     }
-
-//     if (resource.id) {
-//       return ''
-//     }
-
-//     meta = models[resource[TYPE]].properties
-//   }
-
-//   let m = resource[TYPE] ? this.getModel(resource[TYPE]) : null
-//   var displayName = '';
-//   for (var p in meta) {
-//     if (p.charAt(0) === '_')
-//       continue
-//     if (!meta[p].displayName) {
-//       if (!displayName  &&  m  &&  resource[p]  &&  m.value.subClassOf === 'tradle.Enum')
-//         return resource[p];
-//       continue
-//     }
-//     let dn = this.getStringValueForProperty(resource, p, meta)
-//     if (dn)
-//       displayName += displayName.length ? ' ' + dn : dn;
-//   }
-//   if (!displayName.length  &&  m) {
-//     let vCols = m.value.viewCols
-//     if (!vCols)
-//       return displayName
-//     let excludeProps = []
-//     if (this.isMessage(m))
-//       excludeProps = ['from', 'to']
-//     for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
-//       if (!resource[vCols[i]]  ||  excludeProps.indexOf[vCols[i]])
-//         continue
-//       displayName = this.getStringValueForProperty(resource, vCols[i], m.value.properties)
-//     }
-//   }
-//   return displayName;
-// }
-
 function buildArrayValue (opts) {
   const { models, model, value, propertyName } = opts
   const prop = model.properties[propertyName]
@@ -149,8 +105,12 @@ function buildArrayValue (opts) {
 
 function buildResourceStub (opts) {
   const { models, resource } = opts
+  validateResource({ models, resource })
   return {
-    id: buildId({ model: models[resource[TYPE]], resource }),
+    id: buildId({
+      model: models[resource[TYPE]],
+      resource
+    }),
     title: buildDisplayName(opts)
   }
 }

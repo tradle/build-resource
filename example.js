@@ -12,15 +12,15 @@ const resource = buildResource({
   .placeOfBirth('San Dimas')
   .emailAddress('ted@wyldstallyns.com')
   .maritalStatus({
-    id: 'tradle.MaritalStatus_4b3d018c5085bc93de73405760a5d2fbcbef6c78de73405760a5d2fbcbef6c78',
+    id: 'tradle.MaritalStatus',
     title: 'Married'
   })
   .education({
-    id: 'tradle.EducationNL_4b3d018c5085bc93de73405760a5d2fbcbef6c78de73405760a5d2fbcbef6c78',
+    id: 'tradle.EducationNL',
     title: 'Ph. D in superheroism'
   })
   .nationality({
-    id: 'tradle.Nationality_4b3d018c5085bc93de73405760a5d2fbcbef6c78de73405760a5d2fbcbef6c78',
+    id: 'tradle.Nationality',
     title: 'American'
   })
   .phones([
@@ -28,7 +28,7 @@ const resource = buildResource({
       "_t": "tradle.Phone",
       "number": "0123456789",
       "phoneType": {
-        "id": "tradle.PhoneTypes_4b3d018c5085bc93de73405760a5d2fbcbef6c78de73405760a5d2fbcbef6c78",
+        "id": "tradle.PhoneTypes",
         "title": "Mobile"
       }
     }

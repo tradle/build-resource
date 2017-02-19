@@ -29,12 +29,12 @@ test('build resource', function (t) {
     photos
   })
 
-  t.throws(() => builder.firstName(2), /string/)
+  t.throws(() => builder.firstName(2), /string/i)
 
-  t.throws(() => builder.useTouchId('hey'), /boolean/)
+  t.throws(() => builder.useTouchId('hey'), /boolean/i)
   t.doesNotThrow(() => builder.useTouchId(true))
 
-  t.throws(() => builder.lastMessageTime('hey'), /date/)
+  t.throws(() => builder.lastMessageTime('hey'), /date/i)
 
   const lastMessageTime = Date.now()
   t.doesNotThrow(() => builder.lastMessageTime(lastMessageTime))
@@ -42,7 +42,10 @@ test('build resource', function (t) {
   builder.myDocuments([
     {
       _s: 'somesig',
-      _t: 'tradle.MediaSnippet'
+      _t: 'tradle.MediaSnippet',
+      summary: 'b',
+      publisher: 'someone',
+      datePublished: '01/01/2001'
     }
   ])
 
