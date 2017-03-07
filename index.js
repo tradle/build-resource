@@ -13,13 +13,13 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 
-module.exports = function builder ({ models, model }) {
+module.exports = function builder ({ models, model, resource }) {
   validateModel(model)
 
-  const resource = {
+  resource = clone({
     [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
-  }
+  }, resource)
 
   const api = {
     toJSON
