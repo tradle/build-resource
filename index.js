@@ -13,7 +13,11 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 
-module.exports = function builder ({ models, model, resource }) {
+exports = module.exports = builder
+exports.id = buildId
+exports.fake = require('./fake')
+
+function builder ({ models, model, resource }) {
   validateModel(model)
 
   resource = clone({
