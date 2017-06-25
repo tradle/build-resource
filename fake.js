@@ -1,7 +1,8 @@
 const crypto = require('crypto')
 const TYPE = '_t'
+const buildId = require('./').id
 
-module.exports = function fakeResource ({ model }) {
+module.exports = function fakeResource ({ models, model }) {
   const type = model.id
   const data = {}
   if (type) data[TYPE] = type
@@ -10,14 +11,40 @@ module.exports = function fakeResource ({ model }) {
   props.forEach(propertyName => {
     if (propertyName.charAt(0) === '_' || propertyName === 'from' || propertyName === 'to') return
 
-    data[propertyName] = fakeValue({ model, propertyName })
+    data[propertyName] = fakeValue({
+      models,
+      model,
+      propertyName
+    })
   })
 
   return data
 }
 
-function fakeValue ({ model, propertyName }) {
+function newFakeData ({ models, model }) {
+  model = typeof model === 'string'
+    ? models[model]
+    : model
+
+  if (!model) throw new Error('model not found')
+
+  const type = model.id
+  const data = {}
+  if (type) data[TYPE] = type
+
+  const props = model.required || Object.keys(model.properties)
+  props.forEach(propertyName => {
+    if (propertyName.charAt(0) === '_' || propertyName === 'from' || propertyName === 'to') return
+
+    data[propertyName] = fakeValue({ models, model, propertyName })
+  })
+
+  return data
+}
+
+function fakeValue ({ models, model, propertyName }) {
   const prop = model.properties[propertyName]
+  const ref = prop.ref || (prop.items && prop.items.ref)
   const { type } = prop
   switch (type) {
     case 'string':
@@ -27,24 +54,62 @@ function fakeValue ({ model, propertyName }) {
     case 'date':
       return Date.now()
     case 'object':
-      if (prop.ref === 'tradle.Money') {
-        return {
-          "value": "6000",
-          "currency": "€"
-        }
-      } else {
-        let link = randomString()
-        return {
-          id: `${prop.ref}_${link}_${link}`,
-          title: ''
-        }
-      }
+      if (!ref) return {}
+
+      return fakeResourceValue({
+        models,
+        model: models[ref]
+      })
     case 'boolean':
       return Math.random() < 0.5
     case 'array':
-      return [newFakeData(prop.items.ref || prop.items)]
+      if (!ref) return []
+
+      return [
+        fakeResourceValue({
+          models,
+          model: models[ref]
+        })
+      ]
+      // const resource = fakeValue({ models, model })
+      // let value
+      // if (ref && !prop.inlined) {
+      //   value = buildId({ model, resource })
+      // } else {
+      //   value = resource
+      // }
+
+      // return [value]
     default:
       throw new Error(`unknown property type: ${type} for property ${propertyName}`)
+  }
+}
+
+function fakeResourceValue ({ models, model }) {
+  const modelId = model.id
+  if (modelId === 'tradle.Money') {
+    return {
+      // [TYPE]: 'tradle.Money',
+      "value": "6000",
+      "currency": "€"
+    }
+  }
+
+  if (modelId === 'tradle.Phone') {
+    return {
+      // [TYPE]: 'tradle.Phone',
+      phoneType: fakeResourceValue({
+        models,
+        model: models['tradle.PhoneTypes']
+      }),
+      number: '3456789'
+    }
+  }
+
+  const link = randomString()
+  return {
+    id: `${modelId}_${link}_${link}`,
+    title: ''
   }
 }
 
