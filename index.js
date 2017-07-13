@@ -15,7 +15,10 @@ const MY_PRODUCT = 'tradle.MyProduct'
 
 exports = module.exports = builder
 exports.id = buildId
+exports.title = buildDisplayName
 exports.fake = require('./fake')
+exports.buildResourceStub = buildResourceStub
+
 
 function builder ({ models, model, resource }) {
   validateModel(model)
@@ -82,21 +85,102 @@ function buildId ({ model, resource }) {
  * severely simplified display name builder
  * @return {String}
  */
-function buildDisplayName ({ model, resource }) {
-  const { properties } = model
-  const displayNameProps = Object.keys(properties).filter(p => {
-    if (typeof resource[p] === 'undefined') return
+// function buildDisplayName ({ model, resource }) {
+//   const { properties } = model
+//   const displayNameProps = Object.keys(properties).filter(p => {
+//     if (typeof resource[p] === 'undefined') return
 
-    const prop = properties[p]
-    if (prop.displayName) {
-      return prop.type !== 'object' && prop.type !== 'array'
+//     const prop = properties[p]
+//     if (prop.displayName) {
+//       if (prop.object)
+//         return getDisplayName({resource, model})
+//       return prop.type !== 'object' && prop.type !== 'array'
+//     }
+//   })
+
+//   return displayNameProps
+//     .map(p => resource[p])
+//     .join(' ')
+// }
+
+
+function buildDisplayName({resource, models}) {
+  if (resource.title)
+    return resource.title
+
+  let model = models[resource[TYPE]]
+  const properties = model.properties
+  let displayName = []
+  for (var p in properties) {
+    if (p.charAt(0) === '_')
+      continue
+    if (!resource[p])
+      continue
+    if (!properties[p].displayName) {
+      if (!displayName  &&  model.subClassOf === 'tradle.Enum')
+        return resource[p];
+      continue
     }
-  })
+    let dn = getStringValueForProperty(resource, p, models)
+    if (dn)
+      displayName.push(dn)
+  }
+  if (displayName.length)
+    return displayName.join(' ')
 
-  return displayNameProps
-    .map(p => resource[p])
-    .join(' ')
+  let vCols = model.viewCols
+  if (!vCols)
+    return
+  let excludeProps = ['from', 'to']
+  for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+    let p =  vCols[i]
+    if (properties[p].type === 'array')
+      continue
+    if (!resource[p]  ||  excludeProps.indexOf[p])
+      continue
+    let dn = getStringValueForProperty(resource, p, models)
+    if (dn)
+      return dn
+  }
 }
+function getStringValueForProperty(resource, p, models) {
+  let meta = models[resource[TYPE]].properties[p]
+  if (meta.type === 'date')
+    return getDateValue(resource[p])
+  if (meta.type !== 'object')
+    return resource[p];
+  if (resource[p].title)
+    return resource[p].title;
+  if (meta.ref) {
+    if (meta[p].ref == 'tradle.Money')  {
+      let c = typeof resource[p].currency  === 'string' ? resource[p].currency : resource[p].currency.symbol
+      return (c || '') + resource[p].value
+    }
+    else
+      return getDisplayName({resource: resource[p], model: models[meta[p].ref]})
+  }
+  // else if (meta[p].displayAs) {
+  //   var dn = this.templateIt(meta[p], resource);
+  //   if (dn)
+  //     return dn
+  // }
+}
+function getDateValue(value) {
+  return value
+  // let valueMoment = moment.utc(value)
+  // let format = 'MMMM Do, YYYY'
+  // return valueMoment && valueMoment.format(format)
+}
+
+function normalizeCurrencySymbol(symbol) {
+  // TODO: remove this after fixing encoding bug
+  if (!symbol  ||  typeof symbol === 'string')
+    return symbol
+  else
+    return symbol.symbol
+},
+
+
 
 function buildArrayValue (opts) {
   const { models, model, value, propertyName } = opts
