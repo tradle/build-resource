@@ -12,6 +12,7 @@ const {
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
+const ENUM = 'tradle.Enum'
 
 exports = module.exports = builder
 exports.id = buildId
@@ -191,7 +192,8 @@ function buildArrayValue (opts) {
 
 function buildResourceStub (opts) {
   const { models, resource } = opts
-  validateResource({ models, resource })
+  if (models[resource[TYPE]].subClassOf !== ENUM)
+    validateResource({ models, resource })
   return {
     id: buildId({
       model: models[resource[TYPE]],
