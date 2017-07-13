@@ -52,7 +52,6 @@ function fakeValue ({ models, model, propertyName }) {
   const ref = prop.ref || (prop.items && prop.items.ref)
   const range = models[ref]
   const { type } = prop
-  if (propertyName === 'scan') debugger
   switch (type) {
     case 'string':
       return randomString()
@@ -60,6 +59,7 @@ function fakeValue ({ models, model, propertyName }) {
       return Math.random() * 100 | 0
     case 'date':
       return Date.now()
+    case 'enum':
     case 'object':
       if (!ref) return {}
 
