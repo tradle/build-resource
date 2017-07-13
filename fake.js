@@ -1,8 +1,9 @@
 const crypto = require('crypto')
 const TYPE = '_t'
+const SIG = '_s'
 const buildId = require('./').id
 
-module.exports = function fakeResource ({ models, model }) {
+module.exports = function fakeResource ({ models, model, signed }) {
   const type = model.id
   const data = {}
   if (type) data[TYPE] = type
@@ -17,6 +18,10 @@ module.exports = function fakeResource ({ models, model }) {
       propertyName
     })
   })
+
+  if (signed) {
+    data[SIG] = randomString(100)
+  }
 
   return data
 }
@@ -45,6 +50,7 @@ function newFakeData ({ models, model }) {
 function fakeValue ({ models, model, propertyName }) {
   const prop = model.properties[propertyName]
   const ref = prop.ref || (prop.items && prop.items.ref)
+  const range = models[ref]
   const { type } = prop
   switch (type) {
     case 'string':
@@ -53,20 +59,31 @@ function fakeValue ({ models, model, propertyName }) {
       return Math.random() * 100 | 0
     case 'date':
       return Date.now()
+    case 'enum':
     case 'object':
       if (!ref) return {}
 
-      return fakeResourceValue({
+      if (range.inlined) {
+        return newFakeData({ models, model: range })
+      }
+
+      return fakeResourceStub({
         models,
-        model: models[ref]
+        model: range
       })
     case 'boolean':
       return Math.random() < 0.5
     case 'array':
       if (!ref) return []
 
+      if (range.inlined) {
+        return [
+          newFakeData({ models, model: range })
+        ]
+      }
+
       return [
-        fakeResourceValue({
+        fakeResourceStub({
           models,
           model: models[ref]
         })
@@ -85,7 +102,7 @@ function fakeValue ({ models, model, propertyName }) {
   }
 }
 
-function fakeResourceValue ({ models, model }) {
+function fakeResourceStub ({ models, model }) {
   const modelId = model.id
   if (modelId === 'tradle.Money') {
     return {
@@ -98,7 +115,7 @@ function fakeResourceValue ({ models, model }) {
   if (modelId === 'tradle.Phone') {
     return {
       // [TYPE]: 'tradle.Phone',
-      phoneType: fakeResourceValue({
+      phoneType: fakeResourceStub({
         models,
         model: models['tradle.PhoneTypes']
       }),
@@ -109,7 +126,7 @@ function fakeResourceValue ({ models, model }) {
   const link = randomString()
   return {
     id: `${modelId}_${link}_${link}`,
-    title: ''
+    title: `${modelId} fake title`
   }
 }
 
