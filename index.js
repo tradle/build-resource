@@ -172,15 +172,13 @@ function getDateValue(value) {
   // return valueMoment && valueMoment.format(format)
 }
 
-function normalizeCurrencySymbol(symbol) {
-  // TODO: remove this after fixing encoding bug
-  if (!symbol  ||  typeof symbol === 'string')
-    return symbol
-  else
-    return symbol.symbol
-},
-
-
+// function normalizeCurrencySymbol(symbol) {
+//   // TODO: remove this after fixing encoding bug
+//   if (!symbol  ||  typeof symbol === 'string')
+//     return symbol
+//   else
+//     return symbol.symbol
+// }
 
 function buildArrayValue (opts) {
   const { models, model, value, propertyName } = opts
