@@ -1,4 +1,5 @@
 const clone = require('clone')
+const pick = require('object.pick')
 const { utils, constants } = require('@tradle/engine')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
@@ -6,8 +7,23 @@ const validateResource = require('@tradle/validate-resource')
 const validateResourceProperty = validateResource.property
 const {
   TYPE,
-  SIG
+  SIG,
+  SEQ,
+  PERMALINK,
+  PREVLINK,
+  PREV_TO_SENDER,
+  PREV_TO_RECIPIENT,
 } = constants
+
+const PROTOCOL_PROPERTIES = [
+  TYPE,
+  SIG,
+  SEQ,
+  PERMALINK,
+  PREVLINK,
+  // misnamed property
+  (PREV_TO_SENDER || PREV_TO_RECIPIENT)
+]
 
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
@@ -20,7 +36,9 @@ exports.title = buildDisplayName
 exports.fake = require('./fake')
 exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
-
+exports.linkProperties = getLinkProperties
+exports.link = getLink
+exports.links = getLinks
 
 function builder ({ models, model, resource }) {
   validateModel(model)
@@ -74,13 +92,42 @@ function buildId ({ model, resource }) {
     throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
   }
 
-  const { link, permalink } = utils.getLinks({ object: resource })
+  const { link, permalink } = getLinks({ model, resource })
   let id = `${model.id}_${permalink}`
   if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
     return `${id}_${link || permalink}`
   }
 
   return id
+}
+
+function getLink ({ model, resource }) {
+  return utils.hexLink(getLinkProperties({ model, resource }))
+}
+
+function getLinks ({ model, resource }) {
+  const link = getLink({ model, resource })
+  const permalink = resource[PERMALINK] || link
+  const links = {
+    link,
+    permalink
+  }
+
+  if (resource[PREVLINK]) {
+    links.prevlink = resource[PREVLINK]
+  }
+
+  return links
+}
+
+function getLinkProperties ({ model, resource }) {
+  const props = Object.keys(model.properties)
+    .filter(propertyName => {
+      const prop = model.properties[propertyName]
+      return !prop.virtual
+    })
+
+  return pick(resource, props.concat(PROTOCOL_PROPERTIES))
 }
 
 /**
@@ -195,6 +242,7 @@ function buildResourceStub (opts) {
   const { models, resource } = opts
   if (models[resource[TYPE]].subClassOf !== ENUM)
     validateResource({ models, resource })
+
   return {
     id: buildId({
       model: models[resource[TYPE]],

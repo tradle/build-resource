@@ -83,14 +83,22 @@
     object.omit "^2.0.1"
     object.pick "^1.2.0"
     typeforce "^1.10.6"
+    xtend "^4.0.1"
 
 "@tradle/validate-resource@tradle/validate-resource":
   version "1.0.0"
   resolved "https://codeload.github.com/tradle/validate-resource/tar.gz/192668e583ce3fec9446a1725a5461218745bb66"
   dependencies:
-    "@tradle/models" "https://github.com/tradle/models"
-    "@tradle/validate" "https://github.com/tradle/validate"
     traverse "^0.6.6"
+
+"@tradle/validate@https://github.com/tradle/validate":
+  version "1.0.0"
+  resolved "https://github.com/tradle/validate#a35d4a7c41e9ab9cd94f7ed6fa297275be908119"
+  dependencies:
+    object.omit "^2.0.1"
+    object.pick "^1.2.0"
+    typeforce "^1.10.6"
+    xtend "^4.0.1"
 
 abstract-leveldown@^2.4.1:
   version "2.6.1"
