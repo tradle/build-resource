@@ -19,6 +19,7 @@ exports.id = buildId
 exports.title = buildDisplayName
 exports.fake = require('./fake')
 exports.buildResourceStub = buildResourceStub
+exports.stub = buildResourceStub
 
 
 function builder ({ models, model, resource }) {
