@@ -1,4 +1,5 @@
 const clone = require('clone')
+const extend = require('xtend/mutable')
 const pick = require('object.pick')
 const { utils, constants } = require('@tradle/engine')
 const validateModels = require('@tradle/validate-model')
@@ -43,10 +44,10 @@ exports.links = getLinks
 function builder ({ models, model, resource }) {
   validateModel(model)
 
-  resource = clone({
+  resource = extend({
     [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
-  }, resource)
+  }, clone(resource))
 
   const api = {
     toJSON
@@ -153,7 +154,7 @@ function getLinkProperties ({ model, resource }) {
 // }
 
 
-function buildDisplayName({resource, models}) {
+function buildDisplayName ({ resource, models }) {
   if (resource.title)
     return resource.title
 
@@ -185,7 +186,7 @@ function buildDisplayName({resource, models}) {
     let p =  vCols[i]
     if (properties[p].type === 'array')
       continue
-    if (!resource[p]  ||  excludeProps.indexOf[p])
+    if (!resource[p]  ||  excludeProps.includes(p))
       continue
     let dn = getStringValueForProperty(resource, p, models)
     if (dn)
@@ -195,7 +196,7 @@ function buildDisplayName({resource, models}) {
 function getStringValueForProperty(resource, p, models) {
   let meta = models[resource[TYPE]].properties[p]
   if (meta.type === 'date')
-    return getDateValue(resource[p])
+    return '' + getDateValue(resource[p])
   if (meta.type !== 'object')
     return resource[p];
   if (resource[p].title)
