@@ -38,8 +38,6 @@ exports.fake = require('./fake')
 exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
 exports.linkProperties = getLinkProperties
-exports.link = getLink
-exports.links = getLinks
 
 function builder ({ models, model, resource }) {
   validateModel(model)
@@ -93,32 +91,13 @@ function buildId ({ model, resource }) {
     throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
   }
 
-  const { link, permalink } = getLinks({ model, resource })
+  const { link, permalink } = calcLinks({ model, resource })
   let id = `${model.id}_${permalink}`
   if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
     return `${id}_${link || permalink}`
   }
 
   return id
-}
-
-function getLink ({ model, resource }) {
-  return utils.hexLink(getLinkProperties({ model, resource }))
-}
-
-function getLinks ({ model, resource }) {
-  const link = getLink({ model, resource })
-  const permalink = resource[PERMALINK] || link
-  const links = {
-    link,
-    permalink
-  }
-
-  if (resource[PREVLINK]) {
-    links.prevlink = resource[PREVLINK]
-  }
-
-  return links
 }
 
 function getLinkProperties ({ model, resource }) {
