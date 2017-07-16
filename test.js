@@ -46,13 +46,6 @@ test('link', function (t) {
     b: 'b'
   })
 
-  const links = buildResource.links({ model, resource })
-  t.same(links, {
-    link: 'ce5fdf0d58aa22ff194cd7f54ea3d749d785bb286f9123723f9388d1d1e5e216',
-    permalink: 'asdf',
-    prevlink: 'dsa'
-  })
-
   t.end()
 })
 
@@ -61,7 +54,7 @@ test('build resource', function (t) {
   const builder = buildResource({ models, model })
 
   t.throws(builder.toJSON, /required/)
-  builder.firstName('ted')
+  builder.set('firstName', 'ted')
   t.same(builder.toJSON(), {
     _t: model.id,
     firstName: 'ted'
@@ -74,7 +67,7 @@ test('build resource', function (t) {
     }
   ]
 
-  builder.photos(photos)
+  builder.set('photos', photos)
 
   t.same(builder.toJSON(), {
     _t: model.id,
@@ -82,17 +75,17 @@ test('build resource', function (t) {
     photos
   })
 
-  t.throws(() => builder.firstName(2), /string/i)
+  t.throws(() => builder.set('firstName', 2), /string/i)
 
-  t.throws(() => builder.useTouchId('hey'), /boolean/i)
-  t.doesNotThrow(() => builder.useTouchId(true))
+  t.throws(() => builder.set('useTouchId', 'hey'), /boolean/i)
+  t.doesNotThrow(() => builder.set('useTouchId', true))
 
-  t.throws(() => builder.lastMessageTime('hey'), /date/i)
+  t.throws(() => builder.set('lastMessageTime', 'hey'), /date/i)
 
   const lastMessageTime = Date.now()
-  t.doesNotThrow(() => builder.lastMessageTime(lastMessageTime))
+  t.doesNotThrow(() => builder.set('lastMessageTime', lastMessageTime))
 
-  builder.myDocuments([
+  builder.set('myDocuments', [
     {
       _s: 'somesig',
       _t: 'tradle.MediaSnippet',
@@ -114,5 +107,27 @@ test('build resource', function (t) {
     }]
   })
 
+  t.throws(() => builder.remove('photos', { _t: 'tradle.Photo' }))
+  builder.add('photos', { _t: 'tradle.Photo' })
+  t.same(builder.get('photos'), [
+    { _t: 'tradle.Photo', url: 'http://bill.ted' },
+    { _t: 'tradle.Photo' }
+  ])
+
+  builder.remove('photos', { _t: 'tradle.Photo' })
+  t.same(builder.get('photos'), [
+    { _t: 'tradle.Photo', url: 'http://bill.ted' }
+  ])
+
+  builder.filterOut('photos', photo => {
+    return photo._t === 'blah'
+  })
+
+  t.same(builder.get('photos'), [
+    { _t: 'tradle.Photo', url: 'http://bill.ted' }
+  ])
+
+  builder.filterOut('photos', photo => photo._t === 'tradle.Photo')
+  t.same(builder.get('photos'), [])
   t.end()
 })
