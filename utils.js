@@ -1,8 +1,10 @@
 const pick = require('object.pick')
+const omit = require('object.omit')
 const validateResource = require('@tradle/validate-resource')
 const { utils, constants } = require('@tradle/engine')
 const {
   TYPE,
+  TYPES,
   SIG,
   SEQ,
   PERMALINK,
@@ -11,6 +13,7 @@ const {
   PREV_TO_RECIPIENT,
 } = constants
 
+const { MESSAGE } = TYPES
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -33,6 +36,9 @@ exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
 exports.array = buildArrayValue
 exports.linkProperties = getLinkProperties
+exports.pickVirtual = validateResource.utils.pickVirtual
+exports.omitVirtual = validateResource.utils.omitVirtual
+exports.setVirtual = validateResource.utils.setVirtual
 
 function buildId ({ model, resource }) {
   if (!resource[SIG]) {
@@ -81,11 +87,12 @@ function getLinkProperties ({ model, resource }) {
 // }
 
 
-function buildDisplayName ({ resource, models }) {
+function buildDisplayName ({ resource, model, models }) {
   if (resource.title)
     return resource.title
 
-  let model = models[resource[TYPE]]
+  if (!model) model = models[resource[TYPE]]
+
   const properties = model.properties
   let displayName = []
   for (var p in properties) {
@@ -95,7 +102,7 @@ function buildDisplayName ({ resource, models }) {
       continue
     if (!properties[p].displayName) {
       if (!displayName  &&  model.subClassOf === 'tradle.Enum')
-        return resource[p];
+        return resource[p]
       continue
     }
     let dn = getStringValueForProperty(resource, p, models)
@@ -120,21 +127,22 @@ function buildDisplayName ({ resource, models }) {
       return dn
   }
 }
+
 function getStringValueForProperty(resource, p, models) {
   let meta = models[resource[TYPE]].properties[p]
   if (meta.type === 'date')
-    return '' + getDateValue(resource[p])
+    return String(getDateValue(resource[p]))
   if (meta.type !== 'object')
-    return resource[p];
+    return resource[p]
   if (resource[p].title)
-    return resource[p].title;
+    return resource[p].title
   if (meta.ref) {
     if (meta[p].ref == 'tradle.Money')  {
       let c = typeof resource[p].currency  === 'string' ? resource[p].currency : resource[p].currency.symbol
       return (c || '') + resource[p].value
     }
     else
-      return getDisplayName({resource: resource[p], model: models[meta[p].ref]})
+      return buildDisplayName({ resource: resource[p], models, model: models[meta[p].ref] })
   }
   // else if (meta[p].displayAs) {
   //   var dn = this.templateIt(meta[p], resource);
@@ -142,6 +150,7 @@ function getStringValueForProperty(resource, p, models) {
   //     return dn
   // }
 }
+
 function getDateValue(value) {
   return value
   // let valueMoment = moment.utc(value)
@@ -171,13 +180,19 @@ function buildResourceStub (opts) {
   if (models[resource[TYPE]].subClassOf !== ENUM)
     validateResource({ models, resource })
 
-  return {
+  const stub = {
     id: buildId({
       model: models[resource[TYPE]],
       resource
-    }),
-    title: buildDisplayName(opts)
+    })
   }
+
+  const title = buildDisplayName({ models, resource })
+  if (title) {
+    stub.title = title
+  }
+
+  return stub
 }
 
 function getRef (prop) {
