@@ -1,6 +1,7 @@
 const pick = require('object.pick')
 const omit = require('object.omit')
 const validateResource = require('@tradle/validate-resource')
+const { pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
 const {
   TYPE,
@@ -36,16 +37,19 @@ exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
 exports.array = buildArrayValue
 exports.linkProperties = getLinkProperties
-exports.pickVirtual = validateResource.utils.pickVirtual
-exports.omitVirtual = validateResource.utils.omitVirtual
-exports.setVirtual = validateResource.utils.setVirtual
+exports.pickVirtual = pickVirtual
+exports.omitVirtual = omitVirtual
+exports.setVirtual = setVirtual
 
 function buildId ({ model, resource }) {
   if (!resource[SIG]) {
     throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
   }
 
-  const { link, permalink } = utils.getLinks({ object: resource })
+  const { link, permalink } = utils.getLinks({
+    object: omitVirtual(resource)
+  })
+
   let id = `${model.id}_${permalink}`
   if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
     return `${id}_${link || permalink}`
