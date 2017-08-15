@@ -89,6 +89,14 @@ function builder ({ models, model, resource }) {
   }
 
   function set (propertyName, value) {
+    if (typeof propertyName === 'object') {
+      for (let key in propertyName) {
+        set(key, propertyName[key])
+      }
+
+      return api
+    }
+
     const prop = getProperty(propertyName)
     checkValue(propertyName, value)
 
