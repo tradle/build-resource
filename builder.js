@@ -44,15 +44,6 @@ function builder ({ models, model, resource }) {
     return prop
   }
 
-  function getArrayProperty (propertyName) {
-    const prop = getProperty(propertyName)
-    if (prop.type !== 'array') {
-      throw new Error(`model ${model.id} property ${propertyName} is not an array`)
-    }
-
-    return prop
-  }
-
   function checkValue (propertyName, value) {
     if (typeof value === 'undefined' || value == null) {
       throw new Error(`invalid value ${value} for property ${propertyName}`)
@@ -60,21 +51,18 @@ function builder ({ models, model, resource }) {
   }
 
   function add (propertyName, value) {
-    const prop = getArrayProperty(propertyName)
     const current = resource[propertyName] || []
     set(propertyName, current.concat(value))
     return api
   }
 
   function filterOut (propertyName, test) {
-    const prop = getArrayProperty(propertyName)
     const current = resource[propertyName] || []
     resource[propertyName] = current.filter(val => !test(val))
     return api
   }
 
   function remove (propertyName, value) {
-    const prop = getArrayProperty(propertyName)
     const current = resource[propertyName] || []
     const idx = resource[propertyName].findIndex(function (item) {
       return deepEqual(item, value)

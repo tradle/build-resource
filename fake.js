@@ -1,7 +1,6 @@
 const crypto = require('crypto')
 const TYPE = '_t'
 const SIG = '_s'
-const buildId = require('./').id
 
 module.exports = function fakeResource ({ models, model, signed }) {
   const type = model.id
