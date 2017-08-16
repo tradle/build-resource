@@ -1,5 +1,4 @@
 const pick = require('object.pick')
-const omit = require('object.omit')
 const validateResource = require('@tradle/validate-resource')
 const { pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
@@ -14,7 +13,6 @@ const {
   PREV_TO_RECIPIENT,
 } = constants
 
-const { MESSAGE } = TYPES
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
@@ -98,8 +96,8 @@ function buildDisplayName ({ resource, model, models }) {
   if (!model) model = models[resource[TYPE]]
 
   const properties = model.properties
-  let displayName = []
-  for (var p in properties) {
+  const displayName = []
+  for (let p in properties) {
     if (p.charAt(0) === '_')
       continue
     if (!resource[p])
@@ -109,47 +107,55 @@ function buildDisplayName ({ resource, model, models }) {
         return resource[p]
       continue
     }
-    let dn = getStringValueForProperty(resource, p, models)
+    let dn = getStringValueForProperty({ resource, propertyName: p, models })
     if (dn)
       displayName.push(dn)
   }
   if (displayName.length)
     return displayName.join(' ')
 
-  let vCols = model.viewCols
+  const vCols = model.viewCols
   if (!vCols)
     return
-  let excludeProps = ['from', 'to']
-  for (let i=0; i<vCols.length  &&  !displayName.length; i++) {
+
+  const excludeProps = ['from', 'to']
+  for (let i = 0; i < vCols.length  &&  !displayName.length; i++) {
     let p =  vCols[i]
     if (properties[p].type === 'array')
       continue
     if (!resource[p]  ||  excludeProps.includes(p))
       continue
-    let dn = getStringValueForProperty(resource, p, models)
+    let dn = getStringValueForProperty({ resource, propertyName: p, models })
     if (dn)
       return dn
   }
 }
 
-function getStringValueForProperty(resource, p, models) {
-  let meta = models[resource[TYPE]].properties[p]
+function getStringValueForProperty ({ resource, propertyName, models }) {
+  const meta = models[resource[TYPE]].properties[propertyName]
   if (meta.type === 'date')
-    return String(getDateValue(resource[p]))
+    return String(getDateValue(resource[propertyName]))
   if (meta.type !== 'object')
-    return resource[p]
-  if (resource[p].title)
-    return resource[p].title
-  if (meta.ref) {
-    if (meta[p].ref == 'tradle.Money')  {
-      let c = typeof resource[p].currency  === 'string' ? resource[p].currency : resource[p].currency.symbol
-      return (c || '') + resource[p].value
+    return resource[propertyName]
+  if (resource[propertyName].title)
+    return resource[propertyName].title
+
+  const { ref } = meta
+  if (ref) {
+    const val = resource[propertyName]
+    if (ref == 'tradle.Money')  {
+      let c = typeof val.currency  === 'string' ? val.currency : val.currency.symbol
+      return (c || '') + val.value
     }
-    else
-      return buildDisplayName({ resource: resource[p], models, model: models[meta[p].ref] })
+
+    return buildDisplayName({
+      resource: val,
+      models,
+      model: models[ref]
+    })
   }
-  // else if (meta[p].displayAs) {
-  //   var dn = this.templateIt(meta[p], resource);
+  // else if (meta[propertyName].displayAs) {
+  //   var dn = this.templateIt(meta[propertyName], resource);
   //   if (dn)
   //     return dn
   // }
@@ -181,14 +187,12 @@ function buildArrayValue (opts) {
 
 function buildResourceStub (opts) {
   const { models, resource, validate=true } = opts
-  if (validate && models[resource[TYPE]].subClassOf !== ENUM)
+  const model = models[resource[TYPE]]
+  if (validate && model.subClassOf !== ENUM)
     validateResource({ models, resource })
 
   const stub = {
-    id: buildId({
-      model: models[resource[TYPE]],
-      resource
-    })
+    id: buildId({ model, resource })
   }
 
   const title = buildDisplayName({ models, resource })
