@@ -180,8 +180,8 @@ function buildArrayValue (opts) {
 }
 
 function buildResourceStub (opts) {
-  const { models, resource } = opts
-  if (models[resource[TYPE]].subClassOf !== ENUM)
+  const { models, resource, validate=true } = opts
+  if (validate && models[resource[TYPE]].subClassOf !== ENUM)
     validateResource({ models, resource })
 
   const stub = {
