@@ -1,2 +1,4 @@
 node_modules/
 *.js1
+test-title.js
+custompack.json

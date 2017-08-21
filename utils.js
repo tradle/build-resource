@@ -136,7 +136,7 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
   if (meta.type === 'date')
     return String(getDateValue(resource[propertyName]))
   if (meta.type !== 'object')
-    return resource[propertyName]
+    return String(resource[propertyName])
   if (resource[propertyName].title)
     return resource[propertyName].title
 
