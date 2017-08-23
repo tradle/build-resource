@@ -1,12 +1,12 @@
 const clone = require('clone')
 const deepEqual = require('deep-equal')
 const extend = require('xtend/mutable')
-const { constants } = require('@tradle/engine')
+const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
 const validateResourceProperty = validateResource.property
-const { TYPE, SIG } = constants
+const ObjectModel = require('@tradle/models').models['tradle.Object']
 const utils = require('./utils')
 
 module.exports = builder
@@ -26,6 +26,8 @@ function builder ({ models, model, resource }) {
     add,
     remove,
     filterOut,
+    previous,
+    original,
     toJSON
   }
 
@@ -36,7 +38,7 @@ function builder ({ models, model, resource }) {
   }
 
   function getProperty (propertyName) {
-    const prop = properties[propertyName]
+    const prop = properties[propertyName] || ObjectModel.properties[propertyName]
     if (!prop) {
       throw new Error(`model ${model.id} has no property ${propertyName}`)
     }
@@ -88,17 +90,28 @@ function builder ({ models, model, resource }) {
     const prop = getProperty(propertyName)
     checkValue(propertyName, value)
 
-    if (prop.type === 'array' && !prop.inlined) {
+    // console.log(propertyName, prop, prop.ref && models[prop.ref].subClassOf)
+    if (prop.ref && models[prop.ref].subClassOf === 'tradle.Enum') {
+      if (!value.startsWith(prop.ref + '_')) {
+        value = `${prop.ref}_${value}`
+      }
+    } else if (prop.type === 'array' && !prop.inlined) {
       value = utils.array({ models, model, propertyName, value })
-    }
-
-    if (prop.type === 'object' && !prop.inlined && prop.ref && !value.id) {
+    } else if (prop.type === 'object' && !prop.inlined && prop.ref && !value.id) {
       value = utils.stub({ models, model, propertyName, resource: value })
     }
 
     validateResourceProperty({ models, model, propertyName, value })
     resource[propertyName] = value
     return api
+  }
+
+  function previous (link) {
+    return set(PREVLINK, link)
+  }
+
+  function original (link) {
+    return set(PERMALINK, link)
   }
 
   function toJSON () {

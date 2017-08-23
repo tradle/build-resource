@@ -1,53 +1,8 @@
 
 const test = require('tape')
 const models = require('@tradle/models')
+const { PREVLINK, PERMALINK } = require('@tradle/constants')
 const buildResource = require('./')
-
-test('link', function (t) {
-  const model = {
-    id: 'hey',
-    type: 'tradle.Model',
-    properties: {
-      a: {
-        type: 'string',
-        virtual: true
-      },
-      b: {
-        type: 'string'
-      }
-    }
-  }
-
-  const resource = {
-    // undeclared
-    _googa: 'goo',
-    googa: 'goog',
-    // protocol props
-    _t: 'hey',
-    _s: 'sig',
-    _n: 1,
-    _q: 'aha',
-    _p: 'dsa',
-    _r: 'asdf',
-    // virtual
-    a: 'a',
-    // declared
-    b: 'b'
-  }
-
-  const linkProperties = buildResource.linkProperties({ model, resource })
-  t.same(linkProperties, {
-    _t: 'hey',
-    _s: 'sig',
-    _n: 1,
-    _q: 'aha',
-    _p: 'dsa',
-    _r: 'asdf',
-    b: 'b'
-  })
-
-  t.end()
-})
 
 test('build resource', function (t) {
   const model = models['tradle.Profile']
@@ -129,5 +84,11 @@ test('build resource', function (t) {
 
   builder.filterOut('photos', photo => photo._t === 'tradle.Photo')
   t.same(builder.get('photos'), [])
+
+  builder.previous('abc')
+  t.same(builder.get(PREVLINK), 'abc')
+
+  builder.original('aaa')
+  t.same(builder.get(PERMALINK), 'aaa')
   t.end()
 })

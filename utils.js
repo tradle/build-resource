@@ -18,23 +18,12 @@ const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
 
-const PROTOCOL_PROPERTIES = [
-  TYPE,
-  SIG,
-  SEQ,
-  PERMALINK,
-  PREVLINK,
-  // misnamed property
-  (PREV_TO_SENDER || PREV_TO_RECIPIENT)
-]
-
 exports.id = buildId
 exports.title = buildDisplayName
 exports.fake = require('./fake')
 exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
 exports.array = buildArrayValue
-exports.linkProperties = getLinkProperties
 exports.pickVirtual = pickVirtual
 exports.omitVirtual = omitVirtual
 exports.setVirtual = setVirtual
@@ -55,39 +44,6 @@ function buildId ({ model, resource }) {
 
   return id
 }
-
-function getLinkProperties ({ model, resource }) {
-  const props = Object.keys(model.properties)
-    .filter(propertyName => {
-      const prop = model.properties[propertyName]
-      return !prop.virtual
-    })
-
-  return pick(resource, props.concat(PROTOCOL_PROPERTIES))
-}
-
-/**
- * severely simplified display name builder
- * @return {String}
- */
-// function buildDisplayName ({ model, resource }) {
-//   const { properties } = model
-//   const displayNameProps = Object.keys(properties).filter(p => {
-//     if (typeof resource[p] === 'undefined') return
-
-//     const prop = properties[p]
-//     if (prop.displayName) {
-//       if (prop.object)
-//         return getDisplayName({resource, model})
-//       return prop.type !== 'object' && prop.type !== 'array'
-//     }
-//   })
-
-//   return displayNameProps
-//     .map(p => resource[p])
-//     .join(' ')
-// }
-
 
 function buildDisplayName ({ resource, model, models }) {
   if (resource.title)

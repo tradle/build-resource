@@ -10,6 +10,7 @@
   "author": "mvayngrib",
   "license": "MIT",
   "dependencies": {
+    "@tradle/constants": "^2.1.0",
     "clone": "^2.1.0",
     "deep-equal": "^1.0.1",
     "object.pick": "^1.2.0",
@@ -32,6 +33,7 @@
   "peerDependencies": {
     "@tradle/engine": "^4.9.0",
     "@tradle/validate-model": "*",
-    "@tradle/validate-resource": "*"
+    "@tradle/validate-resource": "*",
+    "@tradle/models": "*"
   }
 }

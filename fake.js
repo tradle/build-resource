@@ -1,4 +1,6 @@
 const crypto = require('crypto')
+const tradleUtils = require('@tradle/engine').utils
+const { setVirtual } = require('./utils')
 const TYPE = '_t'
 const SIG = '_s'
 
@@ -19,7 +21,16 @@ module.exports = function fakeResource ({ models, model, signed }) {
   })
 
   if (signed) {
-    data[SIG] = randomString(100)
+    if (!data[SIG]) {
+      data[SIG] = randomString(100)
+    }
+
+    const link = data._link || tradleUtils.hexLink(data)
+    setVirtual(data, {
+      _link: data._link || link,
+      _permalink: data._permalink || link,
+      _author: data._author || randomString()
+    })
   }
 
   return data
@@ -59,7 +70,14 @@ function fakeValue ({ models, model, propertyName }) {
     case 'date':
       return Date.now()
     case 'enum':
+      return firstValue(randomElement(prop.oneOf))
     case 'object':
+      if (range && range.subClassOf === 'tradle.Enum') {
+        if (range.enum) {
+          return `${ref}_${randomElement(range.enum).id}`
+        }
+      }
+
       if (!ref) return {}
 
       if (range.inlined) {
@@ -131,4 +149,14 @@ function fakeResourceStub ({ models, model }) {
 
 function randomString () {
   return crypto.randomBytes(32).toString('hex')
+}
+
+function randomElement (arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+function firstValue (obj) {
+  for (let key in obj) {
+    return obj[key]
+  }
 }
