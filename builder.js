@@ -107,10 +107,22 @@ function builder ({ models, model, resource }) {
   }
 
   function previous (link) {
+    if (typeof link === 'object') {
+      set(PREVLINK, link._link)
+      if (link._permalink) {
+        // set original too
+        original(link._permalink)
+      }
+    }
+
     return set(PREVLINK, link)
   }
 
   function original (link) {
+    if (typeof link === 'object') {
+      return set(PERMALINK, link._permalink || link._link)
+    }
+
     return set(PERMALINK, link)
   }
 
