@@ -12,6 +12,10 @@ const utils = require('./utils')
 module.exports = builder
 
 function builder ({ models, model, resource }) {
+  if (typeof model === 'string') {
+    model = models[model]
+  }
+
   validateModel(model)
   const { properties } = model
 
