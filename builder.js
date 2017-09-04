@@ -5,6 +5,7 @@ const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
+const { getRef, isInlinedProperty } = validateResource.utils
 const validateResourceProperty = validateResource.property
 const ObjectModel = require('@tradle/models').models['tradle.Object']
 const utils = require('./utils')
@@ -91,17 +92,18 @@ function builder ({ models, model, resource }) {
       return api
     }
 
-    const prop = getProperty(propertyName)
+    const property = getProperty(propertyName)
     checkValue(propertyName, value)
 
     // console.log(propertyName, prop, prop.ref && models[prop.ref].subClassOf)
-    if (prop.ref && models[prop.ref].subClassOf === 'tradle.Enum') {
-      if (!value.startsWith(prop.ref + '_')) {
-        value = `${prop.ref}_${value}`
-      }
-    } else if (prop.type === 'array' && !prop.inlined) {
+    const ref = getRef(property)
+    const range = ref && models[ref]
+    const inlined = isInlinedProperty({ models, property })
+    if (range && range.subClassOf === 'tradle.Enum') {
+      value = normalizeEnumValue({ model: range, value })
+    } else if (property.type === 'array' && !inlined) {
       value = utils.array({ models, model, propertyName, value })
-    } else if (prop.type === 'object' && !prop.inlined && prop.ref && !value.id) {
+    } else if (property.type === 'object' && !inlined && ref && !value.id) {
       value = utils.stub({ models, model, propertyName, resource: value })
     }
 
@@ -136,4 +138,17 @@ function builder ({ models, model, resource }) {
     delete copy[SIG]
     return copy
   }
+}
+
+function normalizeEnumValue ({ model, value }) {
+  const title = typeof value === 'string' ? null : value && value.title
+  let id = typeof value === 'string' ? value : value.id
+  if (!id.startsWith(model.id + '_')) {
+    id = `${model.id}_${id}`
+  }
+
+  const norm = { id }
+  if (typeof title === 'string') norm.title = title
+
+  return norm
 }

@@ -74,7 +74,11 @@ function fakeValue ({ models, model, propertyName }) {
     case 'object':
       if (range && range.subClassOf === 'tradle.Enum') {
         if (range.enum) {
-          return `${ref}_${randomElement(range.enum).id}`
+          let val = randomElement(range.enum)
+          return {
+            id: `${ref}_${val.id}`,
+            title: val.title
+          }
         }
       }
 
