@@ -27,6 +27,7 @@ function builder ({ models, model, resource }) {
 
   const api = {
     set,
+    setVirtual,
     get,
     add,
     remove,
@@ -109,6 +110,15 @@ function builder ({ models, model, resource }) {
 
     validateResourceProperty({ models, model, propertyName, value })
     resource[propertyName] = value
+    return api
+  }
+
+  function setVirtual (props) {
+    if (typeof props === 'string') {
+      return setVirtual({ [props]: arguments[1] })
+    }
+
+    validateResource.utils.setVirtual(resource, props)
     return api
   }
 

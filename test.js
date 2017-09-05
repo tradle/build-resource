@@ -1,7 +1,7 @@
 
 const test = require('tape')
 const models = require('@tradle/models')
-const { PREVLINK, PERMALINK } = require('@tradle/constants')
+const { TYPE, PREVLINK, PERMALINK } = require('@tradle/constants')
 const { utils } = require('@tradle/engine')
 const buildResource = require('./')
 
@@ -110,6 +110,27 @@ test('links', function (t) {
   t.same(buildResource.calcLinks(obj), utils.getLinks({
     object: buildResource.omitVirtual(obj)
   }))
+
+  t.end()
+})
+
+test('setVirtual', function (t) {
+  const res = buildResource({
+    models,
+    model: 'tradle.Profile'
+  })
+  .set({ firstName: 'bob' })
+  .setVirtual({
+    _link: 'blah'
+  })
+  .toJSON()
+
+  t.same(res, {
+    [TYPE]: 'tradle.Profile',
+    firstName: 'bob',
+    _link: 'blah',
+    _virtual: ['_link']
+  })
 
   t.end()
 })
