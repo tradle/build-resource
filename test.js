@@ -2,6 +2,7 @@
 const test = require('tape')
 const models = require('@tradle/models')
 const { PREVLINK, PERMALINK } = require('@tradle/constants')
+const { utils } = require('@tradle/engine')
 const buildResource = require('./')
 
 test('build resource', function (t) {
@@ -90,5 +91,25 @@ test('build resource', function (t) {
 
   builder.original('aaa')
   t.same(builder.get(PERMALINK), 'aaa')
+  t.end()
+})
+
+test('links', function (t) {
+  const obj = {
+    _t: 'something',
+    _s: 'blah',
+    _virtual: ['_link', '_permalink'],
+    _link: 'fakelink',
+    // ignored
+    _permalink: 'fakepermalink'
+  }
+
+  t.equal(buildResource.link(obj), obj._link)
+  t.equal(buildResource.calcLink(obj), utils.hexLink(obj))
+  t.same(buildResource.links(obj), { link: obj._link, permalink: obj._link })
+  t.same(buildResource.calcLinks(obj), utils.getLinks({
+    object: buildResource.omitVirtual(obj)
+  }))
+
   t.end()
 })

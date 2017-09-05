@@ -27,15 +27,63 @@ exports.array = buildArrayValue
 exports.pickVirtual = pickVirtual
 exports.omitVirtual = omitVirtual
 exports.setVirtual = setVirtual
+exports.link = getLink
+exports.permalink = getPermalink
+exports.links = getLinks
+exports.calcLink = calcLink
+exports.calcPermalink = calcPermalink
+exports.calcLinks = calcLinks
+
+function getVirtual (object, propertyName) {
+  if (object._virtual && object._virtual.includes(propertyName)) {
+    return object[propertyName]
+  }
+}
+
+function calcLink (object) {
+  return utils.hexLink(object)
+}
+
+function calcPermalink (object) {
+  return object => object[PERMALINK] || calcLink(object)
+}
+
+function getLink (object) {
+  return getVirtual(object, '_link') || calcLink(object)
+}
+
+function getPermalink (object) {
+  return object[PERMALINK] ||
+    getVirtual(object, '_link') ||
+    getLink(object)
+}
+
+function getLinks (object) {
+  const link = getLink(object)
+  const links = {
+    link,
+    permalink: object[PERMALINK] || link
+  }
+
+  if (object[PREVLINK]) {
+    links.prevlink = object[PREVLINK]
+  }
+
+  return links
+}
+
+function calcLinks (object) {
+  return utils.getLinks({
+    object: omitVirtual(object)
+  })
+}
 
 function buildId ({ model, resource }) {
   if (!resource[SIG]) {
     throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
   }
 
-  const { link, permalink } = utils.getLinks({
-    object: omitVirtual(resource)
-  })
+  const { link, permalink } = calcLinks(resource)
 
   let id = `${model.id}_${permalink}`
   if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
