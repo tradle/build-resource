@@ -158,3 +158,9 @@ function builder ({ models, model, resource, mutate }) {
     return extend(obj, toJSON())
   }
 }
+
+builder.set = function ({ models, model, resource, properties }) {
+  return builder({ models, model, resource })
+    .set(properties)
+    .writeTo(resource)
+}

@@ -155,6 +155,22 @@ test('writeTo', function (t) {
     firstName: 'bob'
   })
 
+  const profile = { [TYPE]: 'tradle.Profile', firstName: 'bob' }
+  buildResource.set({
+    models,
+    model: 'tradle.Profile',
+    resource: profile,
+    properties: {
+      lastName: 'boogie'
+    }
+  })
+
+  t.same(profile,  {
+    [TYPE]: 'tradle.Profile',
+    firstName: 'bob',
+    lastName: 'boogie'
+  })
+
   t.end()
 })
 
