@@ -14,6 +14,10 @@ module.exports = builder
 
 function builder ({ models, model, resource, mutate }) {
   if (typeof model === 'string') {
+    if (!models[model]) {
+      throw new Error(`model ${model} not found`)
+    }
+
     model = models[model]
   }
 
@@ -102,7 +106,7 @@ function builder ({ models, model, resource, mutate }) {
     const range = ref && models[ref]
     const inlined = isInlinedProperty({ models, property })
     if (range && range.subClassOf === 'tradle.Enum') {
-      value = normalizeEnumValue({ model: range, value })
+      value = utils.enumValue({ model: range, value })
     } else if (property.type === 'array' && !inlined) {
       value = utils.array({ models, model, propertyName, value })
     } else if (property.type === 'object' && !inlined && ref && !value.id) {
@@ -153,17 +157,4 @@ function builder ({ models, model, resource, mutate }) {
   function writeTo (obj) {
     return extend(obj, toJSON())
   }
-}
-
-function normalizeEnumValue ({ model, value }) {
-  const title = typeof value === 'string' ? null : value && value.title
-  let id = typeof value === 'string' ? value : value.id
-  if (!id.startsWith(model.id + '_')) {
-    id = `${model.id}_${id}`
-  }
-
-  const norm = { id }
-  if (typeof title === 'string') norm.title = title
-
-  return norm
 }

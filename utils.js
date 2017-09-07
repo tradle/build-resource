@@ -33,6 +33,7 @@ exports.links = getLinks
 exports.calcLink = calcLink
 exports.calcPermalink = calcPermalink
 exports.calcLinks = calcLinks
+exports.enumValue = normalizeEnumValue
 
 function getVirtual (object, propertyName) {
   if (object._virtual && object._virtual.includes(propertyName)) {
@@ -209,4 +210,18 @@ function buildResourceStub (opts) {
 
 function getRef (prop) {
   return prop.ref || prop.items.ref
+}
+
+function normalizeEnumValue ({ model, value }) {
+  const id = typeof value === 'string' ? value : value.id
+  const plainId = id.startsWith(model.id + '_') ? id.slice(model.id.length + 1) : id
+  const match = model.enum.find(eVal => eVal.id === plainId)
+
+  if (!match) {
+    throw new Error(`enum value with id ${plainId} not found in model ${model.id}`)
+  }
+
+  const formattedId = `${model.id}_${match.id}`
+  const norm = { id: formattedId, title: match.title }
+  return norm
 }

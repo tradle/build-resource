@@ -1,6 +1,11 @@
 
 const test = require('tape')
-const models = require('@tradle/models')
+const mergeModels = require('@tradle/merge-models')
+const models = mergeModels()
+  .add(require('@tradle/models').models)
+  .add(require('@tradle/custom-models'))
+  .get()
+
 const { TYPE, PREVLINK, PERMALINK } = require('@tradle/constants')
 const { utils } = require('@tradle/engine')
 const buildResource = require('./')
@@ -148,6 +153,44 @@ test('writeTo', function (t) {
   t.same(resource, {
     [TYPE]: 'tradle.Profile',
     firstName: 'bob'
+  })
+
+  t.end()
+})
+
+test('enum value', function (t) {
+  const val = buildResource.enumValue({
+    model: models['tradle.MaritalStatus'],
+    value: 'married'
+  })
+
+  t.same(val, {
+    id: 'tradle.MaritalStatus_married',
+    title: 'Married'
+  })
+
+  t.throws(() => {
+    buildResource.enumValue({
+      model: models['tradle.MaritalStatus'],
+      value: 'tinder'
+    })
+  }, /not found/)
+
+  const aboutYou = buildResource({
+      models,
+      model: 'tradle.AboutYou'
+    })
+    .set({
+      maritalStatus: 'married',
+    })
+    .toJSON()
+
+  t.same(aboutYou, {
+    _t: 'tradle.AboutYou',
+    maritalStatus: {
+      id: 'tradle.MaritalStatus_married',
+      title: 'Married'
+    }
   })
 
   t.end()
