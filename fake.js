@@ -1,10 +1,13 @@
 const crypto = require('crypto')
 const tradleUtils = require('@tradle/engine').utils
+const { isInlinedProperty } = require('@tradle/validate-resource').utils
 const { setVirtual } = require('./utils')
 const TYPE = '_t'
 const SIG = '_s'
 
-module.exports = function fakeResource ({ models, model, signed }) {
+module.exports = fakeResource
+
+function fakeResource ({ models, model, signed }) {
   const type = model.id
   const data = {}
   if (type) data[TYPE] = type
@@ -62,6 +65,7 @@ function fakeValue ({ models, model, propertyName }) {
   const ref = prop.ref || (prop.items && prop.items.ref)
   const range = models[ref]
   const { type } = prop
+  const inlined = isInlinedProperty({ models, property: prop })
   switch (type) {
     case 'string':
       return randomString()
@@ -84,8 +88,8 @@ function fakeValue ({ models, model, propertyName }) {
 
       if (!ref) return {}
 
-      if (range.inlined) {
-        return newFakeData({ models, model: range })
+      if (inlined) {
+        return fakeResource({ models, model: range, signed: !range.inlined })
       }
 
       return fakeResourceStub({
@@ -97,9 +101,9 @@ function fakeValue ({ models, model, propertyName }) {
     case 'array':
       if (!ref) return []
 
-      if (range.inlined) {
+      if (inlined) {
         return [
-          newFakeData({ models, model: range })
+          fakeResource({ models, model: range, signed: range.inlined })
         ]
       }
 
