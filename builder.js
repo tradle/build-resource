@@ -12,7 +12,7 @@ const utils = require('./utils')
 
 module.exports = builder
 
-function builder ({ models, model, resource }) {
+function builder ({ models, model, resource, mutate }) {
   if (typeof model === 'string') {
     model = models[model]
   }
@@ -34,7 +34,8 @@ function builder ({ models, model, resource }) {
     filterOut,
     previous,
     original,
-    toJSON
+    toJSON,
+    writeTo
   }
 
   return api
@@ -147,6 +148,10 @@ function builder ({ models, model, resource }) {
     const copy = clone(resource)
     delete copy[SIG]
     return copy
+  }
+
+  function writeTo (obj) {
+    return extend(obj, toJSON())
   }
 }
 

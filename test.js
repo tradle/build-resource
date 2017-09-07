@@ -134,3 +134,21 @@ test('setVirtual', function (t) {
 
   t.end()
 })
+
+test('writeTo', function (t) {
+  var resource = {}
+  buildResource({
+    models,
+    model: 'tradle.Profile',
+    resource
+  })
+  .set('firstName', 'bob')
+  .writeTo(resource)
+
+  t.same(resource, {
+    [TYPE]: 'tradle.Profile',
+    firstName: 'bob'
+  })
+
+  t.end()
+})
