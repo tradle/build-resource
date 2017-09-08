@@ -1,6 +1,6 @@
 {
   "name": "@tradle/build-resource",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "resource builder",
   "main": "index.js",
   "repository": {
