@@ -211,3 +211,26 @@ test('enum value', function (t) {
 
   t.end()
 })
+
+test('buildId short', function (t) {
+  const resource = {
+    _t: 'tradle.AboutYou',
+    _s: 'blah'
+  }
+
+  const link = buildResource.calcLink(resource)
+  const permalink = link
+  t.same(
+    buildResource.id({
+      model: models['tradle.AboutYou'],
+      link,
+      permalink
+    }),
+    buildResource.id({
+      model: models['tradle.AboutYou'],
+      resource
+    })
+  )
+
+  t.end()
+})
