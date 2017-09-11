@@ -91,7 +91,8 @@ function buildId ({ model, resource, link, permalink }) {
   }
 
   const id = `${model.id}_${permalink}`
-  if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
+  // if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
+  if (model.subClassOf !== ENUM) {
     return `${id}_${link || permalink}`
   }
 
