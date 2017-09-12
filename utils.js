@@ -79,7 +79,7 @@ function calcLinks (object) {
   })
 }
 
-function buildId ({ model, resource, link, permalink }) {
+function buildId ({ model, resource, type, link, permalink }) {
   if (resource  &&  !(link && permalink)) {
     if (!resource[SIG]) {
       throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
@@ -90,7 +90,11 @@ function buildId ({ model, resource, link, permalink }) {
     permalink = links.permalink
   }
 
-  return `${model.id}_${permalink}_${link}`
+  if (!(link && permalink)) {
+    throw new Error('expected "link" and "permalink"')
+  }
+
+  return `${type || model.id}_${permalink}_${link}`
 }
 
 function buildDisplayName ({ resource, model, models }) {

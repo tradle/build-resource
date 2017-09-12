@@ -220,17 +220,36 @@ test('buildId short', function (t) {
 
   const link = buildResource.calcLink(resource)
   const permalink = link
+  const expected = buildResource.id({
+    model: models['tradle.AboutYou'],
+    resource
+  })
+
   t.same(
     buildResource.id({
       model: models['tradle.AboutYou'],
       link,
       permalink
     }),
-    buildResource.id({
-      model: models['tradle.AboutYou'],
-      resource
-    })
+    expected
   )
+
+  t.same(
+    buildResource.id({
+      type: 'tradle.AboutYou',
+      link,
+      permalink
+    }),
+    expected
+  )
+
+  t.throws(() => {
+    buildResource.id({
+      type: 'tradle.AboutYou',
+      permalink
+    }),
+    expected
+  }, /link/)
 
   t.end()
 })
