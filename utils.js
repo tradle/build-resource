@@ -80,7 +80,7 @@ function calcLinks (object) {
 }
 
 function buildId ({ model, resource, link, permalink }) {
-  if (!(link && permalink)) {
+  if (resource  &&  !(link && permalink)) {
     if (!resource[SIG]) {
       throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
     }
