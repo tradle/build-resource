@@ -90,13 +90,7 @@ function buildId ({ model, resource, link, permalink }) {
     permalink = links.permalink
   }
 
-  const id = `${model.id}_${permalink}`
-  // if (model.subClassOf === FORM || model.id === VERIFICATION || model.id === MY_PRODUCT) {
-  if (model.subClassOf !== ENUM) {
-    return `${id}_${link || permalink}`
-  }
-
-  return id
+  return `${model.id}_${permalink}_${link}`
 }
 
 function buildDisplayName ({ resource, model, models }) {
