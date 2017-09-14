@@ -31,7 +31,7 @@
     "lint": "eslint --quiet ."
   },
   "peerDependencies": {
-    "@tradle/engine": "^4.9.0",
+    "@tradle/engine": ">=4.9.0 <6",
     "@tradle/validate-model": "*",
     "@tradle/validate-resource": "*",
     "@tradle/models": "*"
