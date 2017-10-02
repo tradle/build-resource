@@ -109,7 +109,7 @@ function builder ({ models, model, resource, mutate }) {
       value = utils.enumValue({ model: range, value })
     } else if (property.type === 'array' && !inlined) {
       value = utils.array({ models, model, propertyName, value })
-    } else if (property.type === 'object' && !inlined && ref && !value.id) {
+    } else if (property.type === 'object' && !inlined && ref && value[TYPE]) {
       value = utils.stub({ models, model, propertyName, resource: value })
     }
 
