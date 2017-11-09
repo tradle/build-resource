@@ -106,7 +106,9 @@ function builder ({ models, model, resource, mutate }) {
     const range = ref && models[ref]
     const inlined = isInlinedProperty({ models, property })
     if (range && range.subClassOf === 'tradle.Enum') {
-      value = utils.enumValue({ model: range, value })
+      value = property.type === 'array'
+        ? value.map(one => utils.enumValue({ model: range, value: one }))
+        : utils.enumValue({ model: range, value })
     } else if (property.type === 'array' && !inlined) {
       value = utils.array({ models, model, propertyName, value })
     } else if (property.type === 'object' && !inlined && ref && value[TYPE]) {
