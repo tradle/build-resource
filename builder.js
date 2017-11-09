@@ -162,6 +162,8 @@ function builder ({ models, model, resource, mutate }) {
 }
 
 builder.set = function ({ models, model, resource, properties }) {
+  if (!model) model = models[resource[TYPE]]
+
   return builder({ models, model, resource })
     .set(properties)
     .writeTo(resource)
