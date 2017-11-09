@@ -20,7 +20,6 @@ const ENUM = 'tradle.Enum'
 
 exports.id = buildId
 exports.title = buildDisplayName
-exports.fake = require('./fake')
 exports.buildResourceStub = buildResourceStub
 exports.stub = buildResourceStub
 exports.array = buildArrayValue
@@ -34,6 +33,7 @@ exports.calcLink = calcLink
 exports.calcPermalink = calcPermalink
 exports.calcLinks = calcLinks
 exports.enumValue = normalizeEnumValue
+exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
   if (object._virtual && object._virtual.includes(propertyName)) {
