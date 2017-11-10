@@ -168,10 +168,3 @@ builder.set = function ({ models, model, resource, properties }) {
     .set(properties)
     .writeTo(resource)
 }
-
-builder.version = function (resource) {
-  const { link, permalink } = utils.links(resource)
-  resource[PREVLINK] = link
-  resource[PERMALINK] = permalink
-  return resource
-}

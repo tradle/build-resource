@@ -1,4 +1,5 @@
 const pick = require('object.pick')
+const clone = require('clone')
 const validateResource = require('@tradle/validate-resource')
 const { pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
@@ -33,6 +34,7 @@ exports.calcLink = calcLink
 exports.calcPermalink = calcPermalink
 exports.calcLinks = calcLinks
 exports.enumValue = normalizeEnumValue
+exports.version = createNewVersion
 exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
@@ -227,4 +229,13 @@ function normalizeEnumValue ({ model, value }) {
   const formattedId = `${model.id}_${match.id}`
   const norm = { id: formattedId, title: match.title }
   return norm
+}
+
+function createNewVersion (resource) {
+  const { link, permalink } = getLinks(resource)
+  resource = clone(resource)
+  delete resource[SIG]
+  resource[PREVLINK] = link
+  resource[PERMALINK] = permalink
+  return omitVirtual(resource, ['_link'])
 }

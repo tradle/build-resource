@@ -255,24 +255,22 @@ test('buildId short', function (t) {
 })
 
 test('version', function(t) {
-  const resource = {
+  let resource = {
     _t: 'tradle.AboutYou',
     _s: 'blah'
   }
 
-  buildResource.version(resource)
+  resource = buildResource.version(resource)
   t.same(resource, {
     _t: 'tradle.AboutYou',
-    _s: 'blah',
     _p: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099',
     _r: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099'
   })
 
   resource._s = 'blah1'
-  buildResource.version(resource)
+  resource = buildResource.version(resource)
   t.same(resource, {
     _t: 'tradle.AboutYou',
-    _s: 'blah1',
     _r: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099',
     _p: '8cef1c8fabc88c17e341bcfc99ce68dcf984add54f7af21151ad02e9e95a95bf'
   })
