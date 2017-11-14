@@ -18,6 +18,7 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
+const stubProps = ['id', 'title']
 
 exports.id = buildId
 exports.title = buildDisplayName
@@ -192,7 +193,22 @@ function buildArrayValue (opts) {
   const ref = getRef(prop)
   if (!ref) return value
 
-  return value.map(resource => buildResourceStub({ models, model, propertyName, resource }))
+  return value.map(resource => {
+    if (isProbablyResourceStub(resource)) {
+      return resource
+    }
+
+    buildResourceStub({ models, model, propertyName, resource })
+  })
+}
+
+function isProbablyResourceStub (value) {
+  if (value[TYPE]) return false
+
+  const keys = Object.keys(value)
+  return keys.length <= stubProps.length && keys.every(prop => {
+    return stubProps.includes(prop) && typeof value[prop] === 'string'
+  })
 }
 
 function buildResourceStub (opts) {
