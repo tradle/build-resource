@@ -97,7 +97,11 @@ function buildId ({ model, resource, type, link, permalink }) {
     throw new Error('expected "link" and "permalink"')
   }
 
-  return `${type || resource[TYPE] || model.id}_${permalink}_${link}`
+  if (!type) {
+    if (resource) type = resource[TYPE]
+    else if (model) type = model.id
+  }
+  return `${type}_${permalink}_${link}`
 }
 
 function buildDisplayName ({ resource, model, models }) {
@@ -198,7 +202,7 @@ function buildArrayValue (opts) {
       return resource
     }
 
-    buildResourceStub({ models, model, propertyName, resource })
+    return buildResourceStub({ models, model, propertyName, resource })
   })
 }
 
