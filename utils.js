@@ -97,7 +97,7 @@ function buildId ({ model, resource, type, link, permalink }) {
     throw new Error('expected "link" and "permalink"')
   }
 
-  return `${type || model.id}_${permalink}_${link}`
+  return `${type || resource[TYPE] || model.id}_${permalink}_${link}`
 }
 
 function buildDisplayName ({ resource, model, models }) {
