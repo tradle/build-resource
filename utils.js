@@ -36,6 +36,7 @@ exports.calcPermalink = calcPermalink
 exports.calcLinks = calcLinks
 exports.enumValue = normalizeEnumValue
 exports.version = createNewVersion
+export.isProbablyResourceStub = isProbablyResourceStub
 exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
