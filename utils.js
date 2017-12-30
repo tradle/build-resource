@@ -1,5 +1,4 @@
-const pick = require('object.pick')
-const clone = require('clone')
+const _ = require('lodash')
 const validateResource = require('@tradle/validate-resource')
 const { pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
@@ -254,7 +253,7 @@ function normalizeEnumValue ({ model, value }) {
 
 function createNewVersion (resource) {
   const { link, permalink } = getLinks(resource)
-  resource = clone(resource)
+  resource = _.cloneDeep(resource)
   delete resource[SIG]
   resource[PREVLINK] = link
   resource[PERMALINK] = permalink

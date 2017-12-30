@@ -1,6 +1,4 @@
-const clone = require('clone')
-const deepEqual = require('deep-equal')
-const extend = require('xtend/mutable')
+const _ = require('lodash')
 const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
@@ -24,10 +22,10 @@ function builder ({ models, model, resource, mutate }) {
   validateModel(model)
   const { properties } = model
 
-  resource = extend({
+  resource = _.extend({
     [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
-  }, clone(resource))
+  }, _.cloneDeep(resource))
 
   const api = {
     set,
@@ -45,7 +43,7 @@ function builder ({ models, model, resource, mutate }) {
   return api
 
   function get (propertyName) {
-    return propertyName ? clone(resource[propertyName]) : toJSON()
+    return propertyName ? _.cloneDeep(resource[propertyName]) : toJSON()
   }
 
   function getProperty (propertyName) {
@@ -78,7 +76,7 @@ function builder ({ models, model, resource, mutate }) {
   function remove (propertyName, value) {
     const current = resource[propertyName] || []
     const idx = resource[propertyName].findIndex(function (item) {
-      return deepEqual(item, value)
+      return _.isEqual(item, value)
     })
 
     if (idx === -1) {
@@ -151,13 +149,13 @@ function builder ({ models, model, resource, mutate }) {
 
   function toJSON () {
     validateResource({ models, model, resource })
-    const copy = clone(resource)
+    const copy = _.cloneDeep(resource)
     delete copy[SIG]
     return copy
   }
 
   function writeTo (obj) {
-    return extend(obj, toJSON())
+    return _.extend(obj, toJSON())
   }
 }
 
