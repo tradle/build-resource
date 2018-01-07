@@ -3,7 +3,7 @@ const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
-const { getRef, isInlinedProperty } = validateResource.utils
+const { getRef, isInlinedProperty, omitVirtual } = validateResource.utils
 const validateResourceProperty = validateResource.property
 const ObjectModel = require('@tradle/models').models['tradle.Object']
 const utils = require('./utils')
@@ -111,6 +111,12 @@ function builder ({ models, model, resource, mutate }) {
       value = utils.array({ models, model, propertyName, value })
     } else if (property.type === 'object' && !inlined && ref && value[TYPE]) {
       value = utils.stub({ models, model, propertyName, resource: value })
+    }
+
+    if (inlined) {
+      value = Array.isArray(value)
+        ? value.map(value => omitVirtual(value))
+        : omitVirtual(value)
     }
 
     validateResourceProperty({ models, model, propertyName, value })
