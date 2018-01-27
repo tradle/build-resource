@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const validateResource = require('@tradle/validate-resource')
-const { pickVirtual, omitVirtual, setVirtual } = validateResource.utils
+const { parseId, pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
 const {
   TYPE,
@@ -208,6 +208,14 @@ function buildArrayValue (opts) {
 
 function isProbablyResourceStub (value) {
   if (value[TYPE]) return false
+  if (!value.id) return false
+
+  try {
+    const { type, permalink, link } = parseId(value)
+    if (!(type && permalink && link)) return false
+  } catch (err) {
+    return false
+  }
 
   const keys = Object.keys(value)
   return keys.length <= stubProps.length && keys.every(prop => {
