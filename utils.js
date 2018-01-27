@@ -211,7 +211,7 @@ function isProbablyResourceStub (value) {
   if (!value.id) return false
 
   try {
-    const { type, permalink, link } = parseId(value)
+    const { type, permalink, link } = parseId(value.id)
     if (!(type && permalink && link)) return false
   } catch (err) {
     return false
