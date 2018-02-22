@@ -108,7 +108,9 @@ function buildDisplayName ({ resource, model, models }) {
   if (resource.title)
     return resource.title
 
-  if (!model) model = models[resource[TYPE]]
+  if (!model) model = models && models[resource[TYPE]]
+
+  if (!model) return
 
   const properties = model.properties
   const displayName = []
@@ -224,8 +226,8 @@ function isProbablyResourceStub (value) {
 }
 
 function buildResourceStub (opts) {
-  const { models, resource, validate=true } = opts
-  const model = models[resource[TYPE]]
+  const { models, resource, validate } = opts
+  const model = models && models[resource[TYPE]]
   if (validate && model.subClassOf !== ENUM)
     validateResource({ models, resource })
 

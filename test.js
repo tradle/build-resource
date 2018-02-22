@@ -277,3 +277,20 @@ test('version', function(t) {
 
   t.end()
 })
+
+test('stub, id', function (t) {
+  const resource = {
+    _t: 'blah',
+    _s: 'sig'
+  }
+
+  const link = buildResource.link(resource)
+  t.equal(link, 'ce5fdf0d58aa22ff194cd7f54ea3d749d785bb286f9123723f9388d1d1e5e216')
+
+  const id = buildResource.id({ resource })
+  t.equal(id, `blah_${link}_${link}`)
+
+  const stub = buildResource.stub({ resource })
+  t.same(stub, { id })
+  t.end()
+})
