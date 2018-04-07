@@ -1,4 +1,5 @@
-const _ = require('lodash')
+const cloneDeep = require('lodash/cloneDeep')
+const isEqual = require('lodash/isEqual')
 const validateResource = require('@tradle/validate-resource')
 const { parseId, pickVirtual, omitVirtual, setVirtual } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
@@ -17,7 +18,9 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
-const stubProps = ['id', 'title']
+const stubProps = (validateResource.utils.stubProps || ['id', 'title', 'type', 'link', 'permalink']).sort()
+const oldStubProps = ['id', 'title'].sort()
+const newStubProps = ['type', 'link', 'permalink'].sort()
 
 exports.id = buildId
 exports.title = buildDisplayName
@@ -210,6 +213,9 @@ function buildArrayValue (opts) {
 
 function isProbablyResourceStub (value) {
   if (value[TYPE]) return false
+
+  const keys = Object.keys(value).sort()
+  if (isEqual(keys, newStubProps)) return true
   if (!value.id) return false
 
   try {
@@ -219,7 +225,6 @@ function isProbablyResourceStub (value) {
     return false
   }
 
-  const keys = Object.keys(value)
   return keys.length <= stubProps.length && keys.every(prop => {
     return stubProps.includes(prop) && typeof value[prop] === 'string'
   })
@@ -231,15 +236,16 @@ function buildResourceStub (opts) {
   if (validate && model.subClassOf !== ENUM)
     validateResource({ models, resource })
 
-  const stub = {
-    id: buildId({ model, resource })
-  }
-
+  const type = resource[TYPE]
+  const { link, permalink } = getLinks(resource)
+  const stub = { type, link, permalink }
   const title = buildDisplayName({ models, resource })
   if (title) {
     stub.title = title
   }
 
+  // id is deprecated
+  stub.id = buildId(stub)
   return stub
 }
 
@@ -263,7 +269,7 @@ function normalizeEnumValue ({ model, value }) {
 
 function createNewVersion (resource) {
   const { link, permalink } = getLinks(resource)
-  resource = _.cloneDeep(resource)
+  resource = cloneDeep(resource)
   delete resource[SIG]
   resource[PREVLINK] = link
   resource[PERMALINK] = permalink
