@@ -1,7 +1,7 @@
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
 const validateResource = require('@tradle/validate-resource')
-const { parseId, pickVirtual, omitVirtual, setVirtual } = validateResource.utils
+const { parseId, pickVirtual, omitVirtual, setVirtual, omitBacklinks } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
 const {
   TYPE,
@@ -231,8 +231,13 @@ function isProbablyResourceStub (value) {
 }
 
 function buildResourceStub (opts) {
-  const { models, resource, validate } = opts
+  let { models, resource, validate } = opts
+
   const model = models && models[resource[TYPE]]
+  if (model) {
+    resource = omitBacklinks({ model, resource })
+  }
+
   if (validate && model.subClassOf !== ENUM)
     validateResource({ models, resource })
 
