@@ -153,10 +153,16 @@ function builder ({ models, model, resource, mutate }) {
     return set(PERMALINK, link)
   }
 
-  function toJSON () {
-    validateResource({ models, model, resource })
+  function toJSON (opts={}) {
+    if (opts.validate !== false) {
+      validateResource({ models, model, resource })
+    }
+
     const copy = _.cloneDeep(resource)
-    delete copy[SIG]
+    if (opts.stripSig !== false) {
+      delete copy[SIG]
+    }
+
     return copy
   }
 
