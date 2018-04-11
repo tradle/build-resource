@@ -64,7 +64,10 @@ test('build resource', function (t) {
     lastMessageTime,
     myDocuments: [{
       id: 'tradle.MediaSnippet_52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c_52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
-      title: 'b'
+      title: 'b',
+      type: 'tradle.MediaSnippet',
+      link: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
+      permalink: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c'
     }]
   })
 
@@ -287,10 +290,13 @@ test('stub, id', function (t) {
   const link = buildResource.link(resource)
   t.equal(link, 'ce5fdf0d58aa22ff194cd7f54ea3d749d785bb286f9123723f9388d1d1e5e216')
 
+  const permalink = buildResource.permalink(resource)
+  t.equal(permalink, link)
+
   const id = buildResource.id({ resource })
   t.equal(id, `blah_${link}_${link}`)
 
   const stub = buildResource.stub({ resource })
-  t.same(stub, { id })
+  t.same(stub, { id, type: resource._t, link, permalink })
   t.end()
 })

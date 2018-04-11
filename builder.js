@@ -23,7 +23,7 @@ function builder ({ models, model, resource, mutate }) {
   const { properties } = model
 
   resource = _.extend({
-    [SIG]: '__sigplaceholder__',
+    // [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
   }, _.cloneDeep(resource))
 
