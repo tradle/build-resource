@@ -63,11 +63,10 @@ test('build resource', function (t) {
     useTouchId: true,
     lastMessageTime,
     myDocuments: [{
-      id: 'tradle.MediaSnippet_52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c_52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
-      title: 'b',
-      type: 'tradle.MediaSnippet',
-      link: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
-      permalink: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c'
+      _t: 'tradle.MediaSnippet',
+      _link: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
+      _permalink: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
+      _displayName: 'b'
     }]
   })
 
@@ -106,7 +105,7 @@ test('links', function (t) {
   const obj = {
     _t: 'something',
     _s: 'blah',
-    _virtual: ['_link', '_permalink'],
+    // _virtual: ['_link', '_permalink'],
     _link: 'fakelink',
     // ignored
     _permalink: 'fakepermalink'
@@ -137,7 +136,7 @@ test('setVirtual', function (t) {
     [TYPE]: 'tradle.Profile',
     firstName: 'bob',
     _link: 'blah',
-    _virtual: ['_link']
+    // _virtual: ['_link']
   })
 
   t.end()
@@ -297,6 +296,6 @@ test('stub, id', function (t) {
   t.equal(id, `blah_${link}_${link}`)
 
   const stub = buildResource.stub({ resource })
-  t.same(stub, { id, type: resource._t, link, permalink })
+  t.same(stub, { _t: resource._t, _link: link, _permalink: permalink })
   t.end()
 })

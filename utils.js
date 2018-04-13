@@ -18,9 +18,9 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
-const stubProps = (validateResource.utils.stubProps || ['id', 'title', 'type', 'link', 'permalink']).sort()
+const { stubProps, isVirtualPropertyName } = validateResource.utils
 const oldStubProps = ['id', 'title'].sort()
-const newStubProps = ['type', 'link', 'permalink'].sort()
+const newStubProps = stubProps.sort() //['type', 'link', 'permalink'].sort()
 
 exports.id = buildId
 exports.title = buildDisplayName
@@ -42,9 +42,7 @@ exports.isProbablyResourceStub = isProbablyResourceStub
 exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
-  if (object._virtual && object._virtual.includes(propertyName)) {
-    return object[propertyName]
-  }
+  return isVirtualPropertyName(propertyName) ? object[propertyName] : undefined
 }
 
 function calcLink (object) {
@@ -215,7 +213,7 @@ function isProbablyResourceStub (value) {
   if (value[TYPE]) return false
 
   const keys = Object.keys(value).sort()
-  if (isEqual(keys, newStubProps)) return true
+  if (isEqual(keys, stubProps)) return true
   if (!value.id) return false
 
   try {
@@ -241,16 +239,18 @@ function buildResourceStub (opts) {
   if (validate && model.subClassOf !== ENUM)
     validateResource({ models, resource })
 
-  const type = resource[TYPE]
   const { link, permalink } = getLinks(resource)
-  const stub = { type, link, permalink }
-  const title = buildDisplayName({ models, resource })
-  if (title) {
-    stub.title = title
+  const stub = {
+    [TYPE]: resource[TYPE],
+    _link: link,
+    _permalink: permalink
   }
 
-  // id is deprecated
-  stub.id = buildId(stub)
+  const title = buildDisplayName({ models, resource })
+  if (title) {
+    stub._displayName = title
+  }
+
   return stub
 }
 

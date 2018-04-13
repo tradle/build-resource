@@ -148,10 +148,12 @@ function fakeResourceStub ({ models, model }) {
     }
   }
 
-  const link = randomString()
+  const _link = randomString()
   return {
-    id: `${modelId}_${link}_${link}`,
-    title: `${modelId} fake title`
+    _t: modelId,
+    _link,
+    _permalink: _link,
+    _displayName: `${modelId} fake title`
   }
 }
 
