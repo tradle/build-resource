@@ -84,6 +84,7 @@ function calcLinks (object) {
 }
 
 function buildId ({ model, resource, type, link, permalink }) {
+  console.warn('DEPRECATED: buildResource.id(...)')
   if (resource  &&  !(link && permalink)) {
     if (!resource[SIG]) {
       throw new Error(`expected resource with type "${resource[TYPE]}" to have a signature`)
@@ -106,8 +107,8 @@ function buildId ({ model, resource, type, link, permalink }) {
 }
 
 function buildDisplayName ({ resource, model, models }) {
-  if (resource.title)
-    return resource.title
+  if (resource._displayName)
+    return resource._displayName
 
   if (!model) model = models && models[resource[TYPE]]
 
@@ -229,9 +230,12 @@ function isProbablyResourceStub (value) {
 }
 
 function buildResourceStub (opts) {
-  let { models, resource, validate } = opts
+  let { models, model, resource, validate } = opts
 
-  const model = models && models[resource[TYPE]]
+  if (!model && models) {
+    model = models[resource[TYPE]]
+  }
+
   if (model) {
     resource = omitBacklinks({ model, resource })
   }
