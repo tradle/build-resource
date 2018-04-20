@@ -1,6 +1,8 @@
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
+const pick = require('lodash/pick')
 const validateResource = require('@tradle/validate-resource')
+const validateModel = require('@tradle/validate-model')
 const { parseId, pickVirtual, omitVirtual, setVirtual, omitBacklinks } = validateResource.utils
 const { utils, constants } = require('@tradle/engine')
 const {
@@ -18,9 +20,11 @@ const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
+const { StubModel } = validateModel.utils
 const { stubProps, isVirtualPropertyName } = validateResource.utils
 const oldStubProps = ['id', 'title'].sort()
 const newStubProps = stubProps.sort() //['type', 'link', 'permalink'].sort()
+const requiredStubProps = stubProps.filter(prop => StubModel.required.includes(prop))
 
 exports.id = buildId
 exports.title = buildDisplayName
@@ -59,6 +63,7 @@ function getLink (object) {
 
 function getPermalink (object) {
   return object[PERMALINK] ||
+    getVirtual(object, '_permalink') ||
     getVirtual(object, '_link') ||
     getLink(object)
 }
@@ -67,7 +72,7 @@ function getLinks (object) {
   const link = getLink(object)
   const links = {
     link,
-    permalink: object[PERMALINK] || link
+    permalink: getPermalink(object)
   }
 
   if (object[PREVLINK]) {
@@ -211,10 +216,8 @@ function buildArrayValue (opts) {
 }
 
 function isProbablyResourceStub (value) {
-  if (value[TYPE]) return false
-
   const keys = Object.keys(value).sort()
-  if (isEqual(keys, stubProps)) return true
+  if (isEqual(keys, stubProps) || isEqual(keys, requiredStubProps)) return true
   if (!value.id) return false
 
   try {
@@ -234,6 +237,10 @@ function buildResourceStub (opts) {
 
   if (!model && models) {
     model = models[resource[TYPE]]
+  }
+
+  if (stubProps.every(prop => prop in resource)) {
+    return pick(resource, stubProps)
   }
 
   if (model) {
