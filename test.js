@@ -113,7 +113,7 @@ test('links', function (t) {
 
   t.equal(buildResource.link(obj), obj._link)
   t.equal(buildResource.calcLink(obj), utils.hexLink(obj))
-  t.same(buildResource.links(obj), { link: obj._link, permalink: obj._link })
+  t.same(buildResource.links(obj), { link: obj._link, permalink: obj._permalink })
   t.same(buildResource.calcLinks(obj), utils.getLinks({
     object: buildResource.omitVirtual(obj)
   }))

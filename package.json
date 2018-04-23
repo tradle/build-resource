@@ -17,9 +17,9 @@
     "@tradle/custom-models": "github:tradle/custom-models",
     "@tradle/engine": "^4.9.0",
     "@tradle/merge-models": "^2.0.0",
-    "@tradle/models": "https://github.com/tradle/models",
-    "@tradle/validate-model": "^2.0.1",
-    "@tradle/validate-resource": "github:tradle/validate-resource#stubs",
+    "@tradle/models": "github:tradle/models",
+    "@tradle/validate-model": "^6.0.1",
+    "@tradle/validate-resource": "^3.0.0",
     "eslint": "^3.15.0",
     "tape": "^4.6.3"
   },
