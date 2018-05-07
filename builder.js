@@ -1,7 +1,8 @@
 const extend = require('lodash/extend')
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
-const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
+const protocol = require('@tradle/protocol')
+const { TYPE, SIG, PREVLINK, PERMALINK, TIMESTAMP } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
@@ -21,6 +22,7 @@ function builder ({ models, model, resource, mutate }) {
     model = models[model]
   }
 
+  const overrides = {}
   validateModel(model)
   const { properties } = model
 
@@ -90,6 +92,8 @@ function builder ({ models, model, resource, mutate }) {
   }
 
   function set (propertyName, value) {
+    if (propertyName === TIMESTAMP) overrides[TIMESTAMP] = value
+
     if (typeof propertyName === 'object') {
       for (let key in propertyName) {
         set(key, propertyName[key])
@@ -156,6 +160,9 @@ function builder ({ models, model, resource, mutate }) {
   }
 
   function toJSON (opts={}) {
+    resource = protocol.object({ object: resource })
+    extend(resource, overrides)
+
     if (opts.validate !== false) {
       validateResource({ models, model, resource })
     }

@@ -1,14 +1,19 @@
 
 const test = require('tape')
 const mergeModels = require('@tradle/merge-models')
+const omit = require('lodash/omit')
+const clone = require('lodash/clone')
+const { TIMESTAMP } = require('@tradle/constants')
 const models = mergeModels()
   .add(require('@tradle/models').models)
   .add(require('@tradle/custom-models'))
   .get()
 
 const { TYPE, PREVLINK, PERMALINK } = require('@tradle/constants')
-const { utils } = require('@tradle/engine')
+const protocol = require('@tradle/protocol')
 const buildResource = require('./')
+
+const toJSONMinusTimestamp = builder => omit(builder.toJSON(), [TIMESTAMP])
 
 test('build resource', function (t) {
   const model = models['tradle.Profile']
@@ -16,7 +21,7 @@ test('build resource', function (t) {
 
   t.throws(builder.toJSON, /required/)
   builder.set('firstName', 'ted')
-  t.same(builder.toJSON(), {
+  t.same(toJSONMinusTimestamp(builder), {
     _t: model.id,
     firstName: 'ted'
   })
@@ -30,7 +35,7 @@ test('build resource', function (t) {
 
   builder.set('photos', photos)
 
-  t.same(builder.toJSON(), {
+  t.same(toJSONMinusTimestamp(builder), {
     _t: model.id,
     firstName: 'ted',
     photos
@@ -46,17 +51,17 @@ test('build resource', function (t) {
   const lastMessageTime = Date.now()
   t.doesNotThrow(() => builder.set('lastMessageTime', lastMessageTime))
 
-  builder.set('myDocuments', [
-    {
-      _s: 'somesig',
-      _t: 'tradle.MediaSnippet',
-      summary: 'b',
-      publisher: 'someone',
-      datePublished: new Date('2001-01-01').getTime()
-    }
-  ])
+  const doc = {
+    _s: 'somesig',
+    _t: 'tradle.MediaSnippet',
+    summary: 'b',
+    publisher: 'someone',
+    datePublished: new Date('2001-01-01').getTime()
+  }
 
-  t.same(builder.toJSON(), {
+  builder.set('myDocuments', [doc])
+
+  t.same(toJSONMinusTimestamp(builder), {
     _t: 'tradle.Profile',
     firstName: 'ted',
     photos: [{ _t: 'tradle.Photo', url: 'http://bill.ted' }],
@@ -64,8 +69,8 @@ test('build resource', function (t) {
     lastMessageTime,
     myDocuments: [{
       _t: 'tradle.MediaSnippet',
-      _link: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
-      _permalink: '52d74a7f7d80eba71b175c2dbcbe907be280aeb111a5929b0aa0dd3ac578256c',
+      _link: protocol.link(doc),
+      _permalink: protocol.link(doc),
       _displayName: 'b'
     }]
   })
@@ -102,19 +107,20 @@ test('build resource', function (t) {
 })
 
 test('links', function (t) {
-  const obj = {
-    _t: 'something',
-    _s: 'blah',
-    // _virtual: ['_link', '_permalink'],
-    _link: 'fakelink',
-    // ignored
-    _permalink: 'fakepermalink'
-  }
+  const obj = protocol.object({
+    object: {
+      _t: 'something',
+      // _virtual: ['_link', '_permalink'],
+      _link: 'fakelink',
+      // ignored
+      _permalink: 'fakepermalink'
+    }
+  })
 
   t.equal(buildResource.link(obj), obj._link)
-  t.equal(buildResource.calcLink(obj), utils.hexLink(obj))
+  t.equal(buildResource.calcLink(obj), protocol.link(obj))
   t.same(buildResource.links(obj), { link: obj._link, permalink: obj._permalink })
-  t.same(buildResource.calcLinks(obj), utils.getLinks({
+  t.same(buildResource.calcLinks(obj), protocol.links({
     object: buildResource.omitVirtual(obj)
   }))
 
@@ -132,7 +138,7 @@ test('setVirtual', function (t) {
   })
   .toJSON()
 
-  t.same(res, {
+  t.same(omit(res, TIMESTAMP), {
     [TYPE]: 'tradle.Profile',
     firstName: 'bob',
     _link: 'blah',
@@ -152,7 +158,7 @@ test('writeTo', function (t) {
   .set('firstName', 'bob')
   .writeTo(resource)
 
-  t.same(resource, {
+  t.same(omit(resource, TIMESTAMP), {
     [TYPE]: 'tradle.Profile',
     firstName: 'bob'
   })
@@ -167,7 +173,7 @@ test('writeTo', function (t) {
     }
   })
 
-  t.same(profile,  {
+  t.same(omit(profile, TIMESTAMP), {
     [TYPE]: 'tradle.Profile',
     firstName: 'bob',
     lastName: 'boogie'
@@ -203,7 +209,7 @@ test('enum value', function (t) {
     })
     .toJSON()
 
-  t.same(aboutYou, {
+  t.same(omit(aboutYou, TIMESTAMP), {
     _t: 'tradle.AboutYou',
     maritalStatus: {
       id: 'tradle.MaritalStatus_married',
@@ -262,19 +268,23 @@ test('version', function(t) {
     _s: 'blah'
   }
 
-  resource = buildResource.version(resource)
-  t.same(resource, {
-    _t: 'tradle.AboutYou',
-    _p: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099',
-    _r: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099'
+  const next = buildResource.version(resource)
+  t.same(omit(next, TIMESTAMP), {
+    "_t": resource._t,
+    "_p": buildResource.link(resource),
+    "_r": buildResource.permalink(resource),
+    "_ph": buildResource.headerHash(resource),
+    "_v": 1
   })
 
-  resource._s = 'blah1'
-  resource = buildResource.version(resource)
-  t.same(resource, {
+  next._s = 'blah1'
+  const nextNext = buildResource.version(next)
+  t.same(omit(nextNext, TIMESTAMP), {
     _t: 'tradle.AboutYou',
-    _r: '2372434e7cd5137237af2298df7731f44729265faae7d677cfb95d31471b7099',
-    _p: '8cef1c8fabc88c17e341bcfc99ce68dcf984add54f7af21151ad02e9e95a95bf'
+    _r: buildResource.permalink(resource),
+    _p: buildResource.link(next),
+    _ph: buildResource.headerHash(next),
+    _v: 2
   })
 
   t.end()
@@ -287,7 +297,7 @@ test('stub, id', function (t) {
   }
 
   const link = buildResource.link(resource)
-  t.equal(link, 'ce5fdf0d58aa22ff194cd7f54ea3d749d785bb286f9123723f9388d1d1e5e216')
+  t.equal(link, 'd54e7a9787264fbb81f6c34f211b9dab0952c4eb7efff1afb3b5e5c34e1bbc96')
 
   const permalink = buildResource.permalink(resource)
   t.equal(permalink, link)
@@ -299,3 +309,4 @@ test('stub, id', function (t) {
   t.same(stub, { _t: resource._t, _link: link, _permalink: permalink })
   t.end()
 })
+
