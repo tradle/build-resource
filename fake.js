@@ -1,5 +1,5 @@
 const crypto = require('crypto')
-const tradleUtils = require('@tradle/engine').utils
+const protocol = require('@tradle/protocol')
 const { isInlinedProperty } = require('@tradle/validate-resource').utils
 const { setVirtual } = require('./utils')
 const TYPE = '_t'
@@ -28,7 +28,7 @@ function fakeResource ({ models, model, signed }) {
       data[SIG] = randomString(100)
     }
 
-    const link = data._link || tradleUtils.hexLink(data)
+    const link = data._link || protocol.link(data)
     setVirtual(data, {
       _link: data._link || link,
       _permalink: data._permalink || link,

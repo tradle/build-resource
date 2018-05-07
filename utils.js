@@ -1,10 +1,10 @@
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
 const pick = require('lodash/pick')
+const protocol = require('@tradle/protocol')
 const validateResource = require('@tradle/validate-resource')
 const validateModel = require('@tradle/validate-model')
-const { parseId, pickVirtual, omitVirtual, setVirtual, omitBacklinks } = validateResource.utils
-const { utils, constants } = require('@tradle/engine')
+const { parseId, pickVirtual, omitVirtual, omitVirtualDeep1, setVirtual, omitBacklinks } = validateResource.utils
 const {
   TYPE,
   TYPES,
@@ -14,14 +14,14 @@ const {
   PREVLINK,
   PREV_TO_SENDER,
   PREV_TO_RECIPIENT,
-} = constants
+} = require('@tradle/constants')
 
 const FORM = 'tradle.Form'
 const VERIFICATION = 'tradle.Verification'
 const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
 const { StubModel } = validateModel.utils
-const { stubProps, isVirtualPropertyName } = validateResource.utils
+const { stubProps, isVirtualPropertyName, sanitize } = validateResource.utils
 const oldStubProps = ['id', 'title'].sort()
 const newStubProps = stubProps.sort() //['type', 'link', 'permalink'].sort()
 const requiredStubProps = stubProps.filter(prop => StubModel.required.includes(prop))
@@ -40,9 +40,11 @@ exports.links = getLinks
 exports.calcLink = calcLink
 exports.calcPermalink = calcPermalink
 exports.calcLinks = calcLinks
+exports.headerHash = protocol.headerHash
 exports.enumValue = normalizeEnumValue
 exports.version = createNewVersion
 exports.isProbablyResourceStub = isProbablyResourceStub
+exports.sanitize = sanitize
 exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
@@ -50,7 +52,7 @@ function getVirtual (object, propertyName) {
 }
 
 function calcLink (object) {
-  return utils.hexLink(object)
+  return protocol.linkString(object)
 }
 
 function calcPermalink (object) {
@@ -83,7 +85,7 @@ function getLinks (object) {
 }
 
 function calcLinks (object) {
-  return utils.getLinks({
+  return protocol.links({
     object: omitVirtual(object)
   })
 }
@@ -284,10 +286,5 @@ function normalizeEnumValue ({ model, value }) {
 }
 
 function createNewVersion (resource) {
-  const { link, permalink } = getLinks(resource)
-  resource = cloneDeep(resource)
-  delete resource[SIG]
-  resource[PREVLINK] = link
-  resource[PERMALINK] = permalink
-  return omitVirtual(resource, ['_link'])
+  return protocol.nextVersion(omitVirtualDeep1(resource))
 }

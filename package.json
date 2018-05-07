@@ -10,15 +10,15 @@
   "author": "mvayngrib",
   "license": "MIT",
   "dependencies": {
-    "@tradle/constants": "^2.1.0",
+    "@tradle/constants": "^2.3.2",
     "lodash": "^4.0.0"
   },
   "devDependencies": {
     "@tradle/custom-models": "github:tradle/custom-models",
-    "@tradle/engine": "^4.9.0",
     "@tradle/merge-models": "^2.0.0",
-    "@tradle/models": "github:tradle/models",
-    "@tradle/validate-model": "^6.0.1",
+    "@tradle/models": "github:tradle/models#nonvirtual",
+    "@tradle/protocol": "github:tradle/protocol#merklelink",
+    "@tradle/validate-model": "github:tradle/validate-model",
     "@tradle/validate-resource": "^3.0.0",
     "eslint": "^3.15.0",
     "tape": "^4.6.3"
@@ -28,7 +28,7 @@
     "lint": "eslint --quiet ."
   },
   "peerDependencies": {
-    "@tradle/engine": ">=4.9.0 <6",
+    "@tradle/protocol": "*",
     "@tradle/validate-model": "*",
     "@tradle/validate-resource": "*",
     "@tradle/models": "*"

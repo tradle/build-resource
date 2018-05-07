@@ -1,7 +1,8 @@
 const extend = require('lodash/extend')
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
-const { TYPE, SIG, PREVLINK, PERMALINK } = require('@tradle/constants')
+const protocol = require('@tradle/protocol')
+const { TYPE, SIG, PREVLINK, PERMALINK, TIMESTAMP } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
@@ -12,6 +13,8 @@ const utils = require('./utils')
 
 module.exports = builder
 
+const SPECIAL = [TIMESTAMP]
+
 function builder ({ models, model, resource, mutate }) {
   if (typeof model === 'string') {
     if (!models[model]) {
@@ -21,11 +24,11 @@ function builder ({ models, model, resource, mutate }) {
     model = models[model]
   }
 
+  const special = {}
   validateModel(model)
   const { properties } = model
 
   resource = extend({
-    // [SIG]: '__sigplaceholder__',
     [TYPE]: model.id
   }, cloneDeep(resource))
 
@@ -90,6 +93,8 @@ function builder ({ models, model, resource, mutate }) {
   }
 
   function set (propertyName, value) {
+    if (SPECIAL.includes(propertyName)) special[propertyName] = value
+
     if (typeof propertyName === 'object') {
       for (let key in propertyName) {
         set(key, propertyName[key])
@@ -135,16 +140,13 @@ function builder ({ models, model, resource, mutate }) {
     return api
   }
 
-  function previous (link) {
-    if (typeof link === 'object') {
-      set(PREVLINK, link._link)
-      if (link._permalink) {
-        // set original too
-        original(link._permalink)
-      }
+  function previous (obj) {
+    set(PREVLINK, obj._link)
+    set(PREVHEADER, protocol.headerHash(obj))
+    if (obj._permalink) {
+      // set original too
+      original(obj._permalink)
     }
-
-    return set(PREVLINK, link)
   }
 
   function original (link) {
@@ -156,6 +158,12 @@ function builder ({ models, model, resource, mutate }) {
   }
 
   function toJSON (opts={}) {
+    if (!resource[SIG]) {
+      resource = protocol.object({ object: resource })
+    }
+
+    extend(resource, special)
+
     if (opts.validate !== false) {
       validateResource({ models, model, resource })
     }
