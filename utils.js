@@ -1,6 +1,8 @@
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
 const pick = require('lodash/pick')
+const omit = require('lodash/omit')
+const extend = require('lodash/extend')
 const protocol = require('@tradle/protocol')
 const validateResource = require('@tradle/validate-resource')
 const validateModel = require('@tradle/validate-model')
@@ -12,8 +14,10 @@ const {
   SEQ,
   PERMALINK,
   PREVLINK,
-  PREV_TO_SENDER,
+  PREVHEADER,
   PREV_TO_RECIPIENT,
+  VERSION,
+  TIMESTAMP,
 } = require('@tradle/constants')
 
 const FORM = 'tradle.Form'
@@ -43,6 +47,7 @@ exports.calcLinks = calcLinks
 exports.headerHash = protocol.headerHash
 exports.enumValue = normalizeEnumValue
 exports.version = createNewVersion
+exports.scaffoldNextVersion = scaffoldNextVersion
 exports.isProbablyResourceStub = isProbablyResourceStub
 exports.sanitize = sanitize
 exports.fake = require('./fake')
@@ -285,6 +290,13 @@ function normalizeEnumValue ({ model, value }) {
   return norm
 }
 
+function scaffoldNextVersion (resource) {
+  const links = getLinks(resource)
+  return protocol.scaffoldNextVersion(resource, links)
+}
+
 function createNewVersion (resource) {
-  return protocol.nextVersion(omitVirtualDeep1(resource))
+  const scaffold = scaffoldNextVersion(resource, getLinks(resource))
+  resource = extend(cloneDeep(omit(resource, SIG)), scaffold)
+  return omitVirtual(resource, ['_link'])
 }

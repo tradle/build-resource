@@ -117,6 +117,7 @@ test('links', function (t) {
     }
   })
 
+  obj._s = 'somesig'
   t.equal(buildResource.link(obj), obj._link)
   t.equal(buildResource.calcLink(obj), protocol.link(obj))
   t.same(buildResource.links(obj), { link: obj._link, permalink: obj._permalink })
@@ -297,7 +298,7 @@ test('stub, id', function (t) {
   }
 
   const link = buildResource.link(resource)
-  t.equal(link, 'd54e7a9787264fbb81f6c34f211b9dab0952c4eb7efff1afb3b5e5c34e1bbc96')
+  t.equal(link, 'ce5fdf0d58aa22ff194cd7f54ea3d749d785bb286f9123723f9388d1d1e5e216')
 
   const permalink = buildResource.permalink(resource)
   t.equal(permalink, link)
