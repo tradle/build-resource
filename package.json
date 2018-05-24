@@ -16,10 +16,10 @@
   "devDependencies": {
     "@tradle/custom-models": "github:tradle/custom-models",
     "@tradle/merge-models": "^2.0.0",
-    "@tradle/models": "github:tradle/models#nonvirtual",
-    "@tradle/protocol": "github:tradle/protocol#merklelink",
-    "@tradle/validate-model": "github:tradle/validate-model",
-    "@tradle/validate-resource": "^3.0.0",
+    "@tradle/models": "github:tradle/models",
+    "@tradle/protocol": "^4.0.0",
+    "@tradle/validate-model": "^7.0.0",
+    "@tradle/validate-resource": "^4.0.0",
     "eslint": "^3.15.0",
     "tape": "^4.6.3"
   },
