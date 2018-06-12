@@ -152,7 +152,8 @@ function buildDisplayName ({ resource, model, models }) {
   const excludeProps = ['from', 'to']
   for (let i = 0; i < vCols.length  &&  !displayName.length; i++) {
     let p =  vCols[i]
-    if (properties[p].type === 'array')
+    let prop = properties[p]
+    if (prop.type === 'array' || prop.signature)
       continue
     if (!resource[p]  ||  excludeProps.includes(p))
       continue
