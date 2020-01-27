@@ -169,6 +169,8 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
     return String(getDateValue(resource[propertyName]))
   if (meta.range === 'model')
     return models[resource[propertyName]].title
+  if (meta.type === 'array')
+    return getStringValueForArrayProperty({ resource, propertyName, models })
   if (meta.type !== 'object')
     return String(resource[propertyName])
   if (resource[propertyName].title)
@@ -194,7 +196,35 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
   //     return dn
   // }
 }
+function getStringValueForArrayProperty({ resource, propertyName, models }) {
+  const meta = models[resource[TYPE]].properties[propertyName]
+  let { items } = meta
+  if (items.ref  &&  models[items.ref].subClassOf === ENUM)
+    return resource[propertyName].map((v) => v.title).join(', ')
 
+  if (!meta.inlined)
+    return item.ref  &&  models[items.ref].title || ''
+debugger
+  let mProps = items.properties
+  if (_.size(mProps) === 1)
+    return resource[propertyName][Object.keys(mProps)][0]
+
+  let dnProps = []
+  for (let ip in mProps) {
+    if (mProps[ip].displayName)
+      dnProps.push(ip)
+  }
+  if (!dnProps.length)
+    return ''
+  let dn = ''
+  let val = resource[propertyName]
+  val.forEach((v, i) => {
+    if (i)
+      dn += ', '
+    dnProps.forEach(pr => dn += `${v[pr]}`)
+  })
+  return dn
+}
 function getDateValue(value) {
   return value
   // let valueMoment = moment.utc(value)
