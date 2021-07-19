@@ -183,9 +183,13 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
       let c = typeof val.currency  === 'string' ? val.currency : val.currency.symbol
       return (c || '') + val.value
     }
-
+    let v
+    if (val[TYPE])
+      v = val
+    else
+      v = {...cloneDeep(val), [TYPE]: ref}
     return buildDisplayName({
-      resource: val,
+      resource: v,
       models,
       model: models[ref]
     })
