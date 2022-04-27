@@ -10,8 +10,9 @@ const { getRef, isInlinedProperty, omitVirtual } = validateResource.utils
 const validateResourceProperty = validateResource.property
 const ObjectModel = require('@tradle/models').models['tradle.Object']
 const utils = require('./utils')
+const xtend = require('xtend/mutable')
 
-module.exports = builder
+module.exports = xtend(builder, utils)
 
 const SPECIAL = [TIMESTAMP]
 
