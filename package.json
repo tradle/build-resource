@@ -21,11 +21,13 @@
     "@tradle/protocol": "^4.0.0",
     "@tradle/validate-model": "^7.0.0",
     "@tradle/validate-resource": "^4.0.0",
+    "c8": "^7.11.2",
     "eslint": "^8.14.0",
     "tape": "^5.5.3"
   },
   "scripts": {
-    "test": "npm run lint && npm run unit",
+    "test": "npm run lint && npm run coverage",
+    "coverage": "c8 --reporter=html --reporter=text npm run unit",
     "unit": "node test",
     "lint": "eslint --quiet ."
   },
