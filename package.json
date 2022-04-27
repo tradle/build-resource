@@ -11,7 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "@tradle/constants": "^2.3.2",
-    "lodash": "^4.0.0"
+    "lodash": "^4.0.0",
+    "xtend": "^4.0.2"
   },
   "devDependencies": {
     "@tradle/custom-models": "github:tradle/custom-models",
