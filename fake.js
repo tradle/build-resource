@@ -39,30 +39,9 @@ function fakeResource ({ models, model, signed }) {
   return data
 }
 
-function newFakeData ({ models, model }) {
-  model = typeof model === 'string'
-    ? models[model]
-    : model
-
-  if (!model) throw new Error('model not found')
-
-  const type = model.id
-  const data = {}
-  if (type) data[TYPE] = type
-
-  const props = model.required || Object.keys(model.properties)
-  props.forEach(propertyName => {
-    if (propertyName.charAt(0) === '_' || propertyName === 'from' || propertyName === 'to') return
-
-    data[propertyName] = fakeValue({ models, model, propertyName })
-  })
-
-  return data
-}
-
 function fakeValue ({ models, model, propertyName }) {
   const prop = model.properties[propertyName]
-  const ref = prop.ref || (prop.items && prop.items.ref)
+  const ref = prop.ref ? prop.ref : prop.items && prop.items.ref
   const range = models[ref]
   const { type } = prop
   const inlined = isInlinedProperty({ models, property: prop })
@@ -70,7 +49,7 @@ function fakeValue ({ models, model, propertyName }) {
     case 'string':
       return randomString()
     case 'number':
-      return Math.random() * 100 | 0
+      return Math.floor(Math.random() * 100)
     case 'date':
       return Date.now()
     case 'enum':

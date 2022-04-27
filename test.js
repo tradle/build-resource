@@ -2,18 +2,19 @@
 const test = require('tape')
 const mergeModels = require('@tradle/merge-models')
 const omit = require('lodash/omit')
-const clone = require('lodash/clone')
 const { TIMESTAMP } = require('@tradle/constants')
 const models = mergeModels()
   .add(require('@tradle/models').models)
-  .add(require('@tradle/custom-models'))
+  .add(require('@tradle/custom-models').models)
   .get()
 
-const { TYPE, PREVLINK, PERMALINK } = require('@tradle/constants')
+const { TYPE } = require('@tradle/constants')
 const protocol = require('@tradle/protocol')
 const buildResource = require('./')
 
-const toJSONMinusTimestamp = builder => omit(builder.toJSON(), [TIMESTAMP])
+function toJSONMinusTimestamp (builder)  {
+  return omit(builder.toJSON(), [TIMESTAMP])
+}
 
 test('build resource', function (t) {
   const model = models['tradle.Profile']
@@ -150,7 +151,7 @@ test('setVirtual', function (t) {
 })
 
 test('writeTo', function (t) {
-  var resource = {}
+  let resource = {}
   buildResource({
     models,
     model: 'tradle.Profile',
@@ -252,13 +253,13 @@ test('buildId short', function (t) {
     expected
   )
 
-  t.throws(() => {
-    buildResource.id({
+  t.throws(
+    () => buildResource.id({
       type: 'tradle.AboutYou',
       permalink
     }),
-    expected
-  }, /link/)
+    /link/
+  )
 
   t.end()
 })

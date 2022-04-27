@@ -1,6 +1,5 @@
 const models = require('@tradle/models')
 const buildResource = require('./')
-const DAY_MILLIS = 24 * 3600 * 1000
 const resource = buildResource({
     models,
     model: models['tradle.PersonalInfo']

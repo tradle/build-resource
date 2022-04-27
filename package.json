@@ -15,17 +15,18 @@
     "xtend": "^4.0.2"
   },
   "devDependencies": {
-    "@tradle/custom-models": "github:tradle/custom-models",
-    "@tradle/merge-models": "^2.0.0",
-    "@tradle/models": "github:tradle/models",
+    "@tradle/custom-models": "github:tradle/custom-models#aeadf7aa42a8c098416b77ba882c106023ee68fc",
+    "@tradle/merge-models": "^3.0.0",
+    "@tradle/models": "github:tradle/models#5ad3a362e852e6b6e73738e5d5b45844c6cf27d4",
     "@tradle/protocol": "^4.0.0",
     "@tradle/validate-model": "^7.0.0",
     "@tradle/validate-resource": "^4.0.0",
-    "eslint": "^3.15.0",
-    "tape": "^4.6.3"
+    "eslint": "^8.14.0",
+    "tape": "^5.5.3"
   },
   "scripts": {
-    "test": "node test",
+    "test": "npm run lint && npm run unit",
+    "unit": "node test",
     "lint": "eslint --quiet ."
   },
   "peerDependencies": {

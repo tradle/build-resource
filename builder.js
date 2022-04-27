@@ -2,7 +2,7 @@ const extend = require('lodash/extend')
 const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
 const protocol = require('@tradle/protocol')
-const { TYPE, SIG, PREVLINK, PERMALINK, TIMESTAMP } = require('@tradle/constants')
+const { TYPE, SIG, PREVLINK, PERMALINK, PREVHEADER, TIMESTAMP } = require('@tradle/constants')
 const validateModels = require('@tradle/validate-model')
 const validateModel = validateModels.model
 const validateResource = require('@tradle/validate-resource')
@@ -15,7 +15,7 @@ module.exports = builder
 
 const SPECIAL = [TIMESTAMP]
 
-function builder ({ models, model, resource, mutate }) {
+function builder ({ models, model, resource }) {
   if (typeof model === 'string') {
     if (!models[model]) {
       throw new Error(`model ${model} not found`)
@@ -61,7 +61,7 @@ function builder ({ models, model, resource, mutate }) {
   }
 
   function checkValue (propertyName, value) {
-    if (typeof value === 'undefined' || value == null) {
+    if (typeof value === 'undefined' || value === null) {
       throw new Error(`invalid value ${value} for property ${propertyName}`)
     }
   }
@@ -131,9 +131,9 @@ function builder ({ models, model, resource, mutate }) {
     return api
   }
 
-  function setVirtual (props) {
+  function setVirtual (props, value) {
     if (typeof props === 'string') {
-      return setVirtual({ [props]: arguments[1] })
+      return setVirtual({ [props]: value })
     }
 
     validateResource.utils.setVirtual(resource, props)

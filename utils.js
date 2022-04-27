@@ -2,32 +2,22 @@ const cloneDeep = require('lodash/cloneDeep')
 const isEqual = require('lodash/isEqual')
 const pick = require('lodash/pick')
 const omit = require('lodash/omit')
+const size = require('lodash/size')
 const extend = require('lodash/extend')
 const protocol = require('@tradle/protocol')
 const validateResource = require('@tradle/validate-resource')
 const validateModel = require('@tradle/validate-model')
-const { parseId, pickVirtual, omitVirtual, omitVirtualDeep1, setVirtual, omitBacklinks } = validateResource.utils
+const { parseId, pickVirtual, omitVirtual, setVirtual, omitBacklinks } = validateResource.utils
 const {
   TYPE,
-  TYPES,
   SIG,
-  SEQ,
   PERMALINK,
   PREVLINK,
-  PREVHEADER,
-  PREV_TO_RECIPIENT,
-  VERSION,
-  TIMESTAMP,
 } = require('@tradle/constants')
 
-const FORM = 'tradle.Form'
-const VERIFICATION = 'tradle.Verification'
-const MY_PRODUCT = 'tradle.MyProduct'
 const ENUM = 'tradle.Enum'
 const { StubModel } = validateModel.utils
 const { stubProps, isVirtualPropertyName, sanitize } = validateResource.utils
-const oldStubProps = ['id', 'title'].sort()
-const newStubProps = stubProps.sort() //['type', 'link', 'permalink'].sort()
 const requiredStubProps = stubProps.filter(prop => StubModel.required.includes(prop))
 
 exports.id = buildId
@@ -53,14 +43,16 @@ exports.sanitize = sanitize
 exports.fake = require('./fake')
 
 function getVirtual (object, propertyName) {
-  return isVirtualPropertyName(propertyName) ? object[propertyName] : undefined
+  if (isVirtualPropertyName(propertyName)) {
+    return object[propertyName]
+  }
 }
 
 function calcLink (object) {
   return protocol.linkString(object)
 }
 
-function calcPermalink (object) {
+function calcPermalink () {
   return object => object[PERMALINK] || calcLink(object)
 }
 
@@ -127,6 +119,31 @@ function buildDisplayName ({ resource, model, models }) {
   if (!model) return
 
   const properties = model.properties
+  const displayName = getPropertyDisplayName(resource, model, models)
+  if (displayName !== null) {
+    return displayName
+  }
+
+  const vCols = model.viewCols
+  if (!vCols)
+    return
+
+  const excludeProps = ['from', 'to']
+  for (let i = 0; i < vCols.length; i += 1) {
+    let p =  vCols[i]
+    let prop = properties[p]
+    if (prop.type === 'array' || prop.signature)
+      continue
+    if (!resource[p]  ||  excludeProps.includes(p))
+      continue
+    let dn = getStringValueForProperty({ resource, propertyName: p, models })
+    if (dn)
+      return dn
+  }
+}
+
+function getPropertyDisplayName (resource, model, models) {
+  const properties = model.properties
   const displayName = []
   for (let p in properties) {
     if (p.charAt(0) === '_')
@@ -142,25 +159,7 @@ function buildDisplayName ({ resource, model, models }) {
     if (dn)
       displayName.push(dn)
   }
-  if (displayName.length)
-    return displayName.join(' ')
-
-  const vCols = model.viewCols
-  if (!vCols)
-    return
-
-  const excludeProps = ['from', 'to']
-  for (let i = 0; i < vCols.length  &&  !displayName.length; i++) {
-    let p =  vCols[i]
-    let prop = properties[p]
-    if (prop.type === 'array' || prop.signature)
-      continue
-    if (!resource[p]  ||  excludeProps.includes(p))
-      continue
-    let dn = getStringValueForProperty({ resource, propertyName: p, models })
-    if (dn)
-      return dn
-  }
+  return displayName.length > 0 ? displayName.join(' ') : null
 }
 
 function getStringValueForProperty ({ resource, propertyName, models }) {
@@ -179,7 +178,7 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
   const { ref } = meta
   if (ref) {
     const val = resource[propertyName]
-    if (ref == 'tradle.Money')  {
+    if (ref === 'tradle.Money')  {
       let c = typeof val.currency  === 'string' ? val.currency : val.currency.symbol
       return (c || '') + val.value
     }
@@ -187,7 +186,7 @@ function getStringValueForProperty ({ resource, propertyName, models }) {
     if (val[TYPE])
       v = val
     else
-      v = {...cloneDeep(val), [TYPE]: ref}
+      v = Object.assign(cloneDeep(val), { [TYPE]: ref })
     return buildDisplayName({
       resource: v,
       models,
@@ -204,13 +203,13 @@ function getStringValueForArrayProperty({ resource, propertyName, models }) {
   const meta = models[resource[TYPE]].properties[propertyName]
   let { items } = meta
   if (items.ref  &&  models[items.ref].subClassOf === ENUM)
-    return resource[propertyName].map((v) => v.title).join(', ')
+    return resource[propertyName].map(v => v.title).join(', ')
 
   if (!meta.inlined)
-    return item.ref  &&  models[items.ref].title || ''
-debugger
+    return items.ref ? models[items.ref].title || '' : ''
+
   let mProps = items.properties
-  if (_.size(mProps) === 1)
+  if (size(mProps) === 1)
     return resource[propertyName][Object.keys(mProps)][0]
 
   let dnProps = []
